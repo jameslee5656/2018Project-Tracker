@@ -14,35 +14,20 @@ class electricFence():
         self.location = []
         self.frequency = {}
         self.chosenPoint = []
+        self.user = ''
         
-    def pullData(self): #pull latitude and longitude
+    def pullData(self, user): #pull latitude and longitude
+        
+        self.user = user
+        
         client = MongoClient('120.126.136.17',27017)
         db = client['Tracker']
-        collection_leo = db['leo']
-        collection_james = db['james']
-        collection_dn2 = db['dn2']
-        collection_db2 = db['db2']
+        collection = db[user]
+        cursor = collection.find({})
 
-        cursor_james = collection_james.find({})
-        cursor_leo = collection_leo.find({})
-        cursor_dn2 = collection_dn2.find({})
-        cursor_db2 = collection_db2.find({})
+        jsonData = [d for d in cursor]
 
-        jsonData_james = [d for d in cursor_james]
-        jsonData_leo = [d for d in cursor_leo]
-        jsonData_dn2 = [d for d in cursor_dn2]
-        jsonData_db2 = [d for d in cursor_db2]
-
-        for x in jsonData_james:
-            self.latitude.append(float(x['latitude']))
-            self.longitude.append(float(x['longitude']))
-        for x in jsonData_leo:
-            self.latitude.append(float(x['latitude']))
-            self.longitude.append(float(x['longitude']))
-        for x in jsonData_dn2:
-            self.latitude.append(float(x['latitude']))
-            self.longitude.append(float(x['longitude']))
-        for x in jsonData_db2:
+        for x in jsonData:
             self.latitude.append(float(x['latitude']))
             self.longitude.append(float(x['longitude']))
             
@@ -76,7 +61,6 @@ class electricFence():
         x,y是緯度，經度的弧度單位，r是地球半徑
         """
         op = math.pi/180
-
         r = 6378.39
         return r*math.acos(math.sin(a[0]*op) * math.sin(b[0]*op) + 
                            math.cos(a[0]*op) * math.cos(b[0]*op) * math.cos(a[1]*op-b[1]*op))
@@ -89,5 +73,6 @@ class electricFence():
                 self.frequency[tuple(x)] = 1
                 
     def chosePoint(self):#point without duplicate
-        self.chosenPoint = list(self.frequency.keys())
+        for x in list(elFence.frequency.keys()):
+            self.chosenPoint.append(list(x))
         return self.chosenPoint
