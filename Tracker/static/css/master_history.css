@@ -1,0 +1,108 @@
+.tool h3{
+	padding-top: 8px;
+	padding-left: 20px;
+	margin-bottom: 10px
+	color:#444444;
+}
+.tool ul li{
+	color:#666666;
+	list-style: none;
+	padding: 0;
+	/*border-bottom: 2px solid rgba(100,100,100,0.3);
+	/*background-color: rgba(255,238,153,0.3);*/
+}
+
+.tool li a {
+	display:block;	/* 將超連結設定為區塊模式 */
+	width:250px;	/* 設定超連結區塊的寬度 */
+	height:40px;	/* 設定超連結區塊的高度 */
+	line-height:40px;	/* 設定超連結區塊的行高 */
+	text-indent:20px;	/* 設定超連結區塊的文字內縮 */
+	text-decoration:none;	/* 去除超連結的底線 */
+	color:#666666;
+	font-size:14px;
+	font-family:Arial;
+}
+
+.tool li a:hover {
+	background-position:left bottom; /* 設定滑鼠摸到超連結的背景圖片位置 */
+	color:#EE7700; /* 設定滑鼠摸到超連結區塊的文字顏色 */
+}
+
+.tool i{
+	margin-right: 10px; 
+}
+
+.tool {
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tool label {
+    width: 50px;
+    font-weight: bold;
+    margin-right: 5px;
+    line-height: 23px;
+    font-size: 20px;
+    color:#666666;
+}
+
+.tool select{
+	font-size: 16px;
+    width: 120px;
+    margin-bottom: 10px;
+    border-color: rgba(238,119,0,0.5);
+}
+
+.tool select:hover {
+    background-color: rgba(238,119,0,0.7);
+}
+
+.tool input {
+	font-size: 16px;
+    width: 215px;
+    line-height: 30px;
+    height: 30px;
+    border-color: rgba(238,119,0,0.5);
+}
+
+.tool input:hover {
+    background-color: rgba(238,119,0,0.7);
+}
+
+.tool a {
+    display: block;
+    color: #7EB1FF;
+    text-decoration: none;
+    font-size: 10px;
+}
+
+.set {
+	margin-top: 10px;
+	position: relative;
+}
+
+#person input[type="submit"]{
+	margin: 0;
+	padding: 0;
+	height: 55px;
+	width: 100%;
+	position: relative;
+	border: 1px solid red;
+	opacity: 0;
+}
+#person input[type="submit"]:hover{
+	cursor: pointer;
+}
+
+#people p{
+	display: inline-block;
+	font-size: 20px;
+	font-weight: 500;
+	color: #222e68;
+	margin-bottom: 10px;
+}

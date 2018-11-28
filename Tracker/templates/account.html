@@ -1,0 +1,426 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>智慧追蹤手環</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}" />
+		<noscript><link rel="stylesheet" href="{{url_for('static', filename='css/noscript.css')}}" /></noscript>
+		<link rel="stylesheet" href="static/css/account.css" />
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- login_view -->
+					{% if current_user.is_active %}
+						<div id="login_view">
+							<h3>{{user}} 歡迎！</h3>
+							<h3><a href="{{ url_for('logout') }}">登出</a></h3>
+						</div>
+					{% else %}
+						<div id="login_view">
+							<h3>嗨你好，請先<a href ="#login">登入</a></h3>
+						</div>
+					{% endif %}
+
+				<!-- Header -->
+					<header id="header">
+						<div class="content">
+							<div class="inner">
+								<h1>NB-IoT Tracker</h1>
+								<p >智能追蹤警示系統</p>
+							</div>
+						</div>
+						<nav>
+							<ul>
+								<li><a href="#intro">介紹</a></li>
+								<li><a href="http://localhost:5000/supervise">即時追蹤</a></li>
+								<li><a href="http://localhost:5000/history">歷史分析</a></li>
+								<li><a href="#login">註冊/登入</a></li>
+								<li><a href="http://localhost:5000/account#account">帳戶管理</a></li>
+							</ul>
+						</nav>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Intro -->
+							<article id="intro">
+								<h2 class="major">關於</h2>
+								<span class="image main"><img src="{{url_for('static', filename='images/intro.jpg')}}" alt="" /></span>
+								<h3>功能價值:</h3>
+								<p>
+									一個定位裝置可以與多個監護人同時對應，提供鄰里長、親人、照護員、社工甚至醫院的同時監護，設定安全範圍。
+								</p>
+								<h3>創新性:</h3>
+								<p>
+									NB-IoT省電、月租較低是IoT應用的未來主流通訊，加上與GPS做成輕量化模組可以達到比現有任何定位系統更加輕、小、省電、節費，大幅提高使用意願。
+								</p>
+								<h3>未來發展:</h3>
+								<p>
+									透過過往紀錄，預測老人可能的路徑與發生危險的機率，更早預防可能的危險。
+								</p>
+							</article>
+
+						<!-- Login -->
+							<article id="login">
+								<h2 class="major">請選擇您的身份</h2>
+								<div>
+									<input type = "button" onclick="javascript:location.href='#login_first'" value = "手環持有人"/>
+									<input type = "button" onclick="javascript:location.href='#login_second'" value = "手環監護人"/>
+								</div>
+							</article>
+
+						<!-- Login_first -->
+							<article id="login_first">
+								<h2 class="major">登入</h2>
+								<form method="post" action="http://localhost:5000/#login_first">
+									{{ log.csrf_token(id = "1") }}
+									<div class="fields">
+										<div class="field half">
+											{{ log.username.label }}
+											{% if log.username.errors %}
+                        						{{ log.username }}
+                        						<div class="invalid-feedback">
+                            						{% for error in log.username.errors %}
+                                						<span style="color:red;font-size: 12px">{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ log.username(id = "loginuser1") }}
+                    						{% endif %}
+										</div>
+										<div class="field half">
+											{{ log.password.label }}
+											{% if log.password.errors %}
+                        						{{ log.password }}
+                        						<div class="invalid-feedback">
+                            						{% for error in log.password.errors %}
+                                						<span style="color:red;font-size: 12px">{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ log.password(id = "logipass1") }}
+                    						{% endif %}
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="登入" class="primary" /></li>
+									</ul>
+								</form>
+
+								<h2 class="major">註冊</h2>
+								<p>(沒有帳號請先註冊)</p>
+								<form method="post" action="http://localhost:5000/#login_first">
+									{{ reg.csrf_token(id = "2") }}
+									<div class="fields">
+										<div class="field half">
+											{{ reg.username.label }}
+											{% if reg.username.errors %}
+                        						{{ reg.username }}
+                        						<div class="invalid-feedback">
+                            						{% for error in reg.username.errors %}
+                                						<span style="color:red;font-size: 12px">{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ reg.username(id = "reguser1") }}
+                    						{% endif %}
+										</div>
+										<div class="field half">
+											{{ reg.bracelet_number.label }}
+											{% if reg.bracelet_number.errors %}
+                        						{{ reg.bracelet_number }}
+                        						<div class="invalid-feedback">
+                            						{% for error in reg.bracelet_number.errors %}
+                                						<span>{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ reg.bracelet_number(id = "regnum") }}
+                    						{% endif %}
+										</div>
+									</div>
+									<div class="fields">
+										<div class="field half">
+											{{ reg.password.label }}
+											{% if reg.password.errors %}
+                        						{{ reg.password }}
+                        						<div class="invalid-feedback">
+                            						{% for error in reg.password.errors %}
+                                						<span>{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ reg.password(id = "regpass1") }}
+                    						{% endif %}
+										</div>
+										<div class="field half">
+											{{ reg.confirm.label }}
+											{% if reg.confirm.errors %}
+                        						{{ reg.confirm }}
+                        						<div class="invalid-feedback">
+                            						{% for error in reg.confirm.errors %}
+                                						<span style="color:red;font-size: 12px">{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ reg.confirm(id = "confirm1") }}
+                    						{% endif %}
+										</div>
+									</div>
+									<div class="fields">
+										<div class="field half">
+											<label for="organization">社群</label>
+											<select>
+												<option>無</option>
+												<option>國立臺北大學</option>
+											</select>
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="註冊" class="primary" /></li>
+									</ul>
+								</form>
+							</article>
+
+						<!-- Login_second -->
+							<article id="login_second">
+								<h2 class="major">登入</h2>
+								<form method="post" action="http://localhost:5000/#login_second">
+									{{ log.csrf_token(id = "3") }}
+									<div class="fields">
+										<div class="field half">
+											{{ log.username.label }}
+											{% if log.username.errors %}
+                        						{{ log.username }}
+                        						<div class="invalid-feedback">
+                            						{% for error in log.username.errors %}
+                                						<span style="color:red;font-size: 12px">{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ log.username(id = "loginuser2") }}
+                    						{% endif %}
+										</div>
+										<div class="field half">
+											{{ log.password.label }}
+											{% if log.password.errors %}
+                        						{{ log.password }}
+                        						<div class="invalid-feedback">
+                            						{% for error in log.password.errors %}
+                                						<span style="color:red;font-size: 12px">{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ log.password(id = "logipass2") }}
+                    						{% endif %}
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="登入" class="primary" /></li>
+									</ul>
+								</form>
+
+								<h2 class="major">註冊</h2>
+								<p>(沒有帳號請先註冊)</p>
+								<form method="post" action="http://localhost:5000/#login_second">
+									{{ reg.csrf_token(id = "4") }}
+									<div class="fields">
+										<div class="field half">
+											{{ reg.username.label }}
+											{% if reg.username.errors %}
+                        						{{ reg.username }}
+                        						<div class="invalid-feedback">
+                            						{% for error in reg.username.errors %}
+                                						<span style="color:red;font-size: 12px">{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ reg.username(id = "reguser2") }}
+                    						{% endif %}
+										</div>
+										<div class="field half">
+											<label for="organization">社群</label>
+											<select>
+												<option>無</option>
+												<option>國立臺北大學</option>
+											</select>
+										</div>
+									</div>
+									<div class="fields">
+										<div class="field half">
+											{{ reg.password.label }}
+											{% if reg.password.errors %}
+                        						{{ reg.password }}
+                        						<div class="invalid-feedback">
+                            						{% for error in reg.password.errors %}
+                                						<span>{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ reg.password(id = "regpass2") }}
+                    						{% endif %}
+										</div>
+										<div class="field half">
+											{{ reg.confirm.label }}
+											{% if reg.confirm.errors %}
+                        						{{ reg.confirm }}
+                        						<div class="invalid-feedback">
+                            						{% for error in reg.confirm.errors %}
+                                						<span style="color:red;font-size: 12px">{{ error }}</span>
+                            						{% endfor %}
+                        						</div>
+                    						{% else %}
+                        						{{ reg.confirm(id = "confirm2") }}
+                    						{% endif %}
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="註冊" class="primary" /></li>
+									</ul>
+								</form>
+							</article>
+
+							<!-- Account -->
+							<article id="account" style="position: relative">
+								<h2 class="major">我的帳戶</h2>
+								<div class = "account">
+									<div class="account-title">
+										<div class="row">
+											<h3>個人資料</h3>
+											<div class="col-1-3">
+												<div class="about-me">
+													<div class="user-pic" style="background-image: url('{{pic}}')"></div>
+													<div class="me">{{user}}</div>
+												</div>
+											</div>
+											<div class="col-1-3">
+												<div class="about-me-title">
+													動態：
+													<div class="about-me-content">
+														嗨,大家好
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="account-title">
+										<div class="row">
+											<h3>設定</h3>
+											<div class="setting">
+					    						<div class="title">
+					    							公開我的位置給好友
+					    							<label class="switch">
+														<input type="checkbox">
+														<span class="slider round"></span>
+													</label>
+					    						</div>
+											</div>
+											<div class="setting">
+					    						<div class="title">
+					    							別人可以從ID搜尋到我
+					    							<label class="switch">
+														<input type="checkbox">
+														<span class="slider round"></span>
+													</label>
+					    						</div>
+											</div>
+											<div class="setting">
+					    						<div class="title">
+					    							待訂
+					    							<label class="switch">
+														<input type="checkbox">
+														<span class="slider round"></span>
+													</label>
+					    						</div>
+											</div>
+											<div class="setting">
+					    						<div class="title">
+					    							待訂
+					    							<label class="switch">
+														<input type="checkbox">
+														<span class="slider round"></span>
+													</label>
+					    						</div>
+											</div>
+										</div>
+									</div>
+									<div class="account-title">
+										<h3>好友目錄</h3>
+									</div>
+									<div class="account-inner-container">
+										<div class="row">
+											<div class="col-1-2">
+												<h4>好友</h4>
+												<div class="account-inner second">
+													{% for friend in Friends %}
+													<form action="#account" method="post">
+														<div class="friend-list">
+															<div class="friends-pic" style="background-image: url('{{friend_pic[Friends.index(friend)]}}')"></div>
+															<div class="friends-c">
+																{{friend}}
+															</div>
+															<div class="check">
+	               												<i class ="fas fa-user-minus" style="color: #f93e3e" >
+	               												<input type="submit" name="delfriend" value="{{friend}}" />
+	               												</i>
+	              											</div>
+														</div>
+													</form>
+													{% endfor %}
+												</div>
+											</div>
+											<div class="col-1-2">
+												<h4>待確認</h4>
+												<div class="account-inner second">
+													<div class="friend-list">
+														<div class="friends-pic-c" style="background-image: url('/static/images/user/DN2.jpg')"></div>
+														<div class="friends-c">DN2</div>
+														<div class="check">
+															<a href = "#"><i class ="fas fa-user-check" style="color: #3df744" ></i></a>
+															<a href = "#"><i class ="fas fa-user-times" style="color: #f93e3e" ></i>
+															</a>
+														</div>
+													</div>
+													<div class="friend-list">
+														<div class="friends-pic-c" style="background-image: url('/static/images/user/james.jpg')"></div>
+														<div class="friends-c">James</div>
+														<div class="check">
+															<a href = "#"><i class ="fas fa-user-check" style="color: #3df744" ></i></a>
+															<a href = "#"><i class ="fas fa-user-times" style="color: #f93e3e" ></i>
+															</a>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>	
+								</div>
+								<div id="bottom"></div>
+							</article>
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<p class="copyright">&copy; Untitled. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+					</footer>
+
+			</div>
+
+		<!-- BG -->
+			<div id="bg"></div>
+
+		<!-- Scripts -->
+			<script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+			<script src="{{url_for('static', filename='js/browser.min.js')}}"></script>
+			<script src="{{url_for('static', filename='js/breakpoints.min.js')}}"></script>
+			<script src="{{url_for('static', filename='js/util.js')}}"></script>
+			<script src="{{url_for('static', filename='js/main.js')}}"></script>
+
+	</body>
+</html>

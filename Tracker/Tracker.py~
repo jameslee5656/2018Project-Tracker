@@ -1,0 +1,20 @@
+from flask import Flask, render_template
+from flask import Flask
+from flask_pymongo import PyMongo
+
+app = Flask(__name__)
+app.config["MONGO_URI"] = "mongodb://localhost:27017/Tracker"
+
+@app.route("/")
+@app.route("/home")
+def home():
+    return render_template('supervise.html')
+
+@app.route("/history")
+def history():
+	mongo = PyMongo(app)
+	datas = mongo.db.user.find({'day': 26})
+	return render_template('history.html',datas = datas)
+
+if __name__ == '__main__':
+	app.run(host = "120.126.136.17",debug=True)
