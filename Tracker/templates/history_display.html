@@ -19,9 +19,10 @@
   <!-- MQTT -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
   <script>
-    var map,polyline,area,setarea,set_ana,temp1 = 0, temp2 = 0;
+    var map,polyline,area,setarea,set_ana,temp1 = 0, temp2 = 0, temp3 = 0;
     var polys = [], p;
     var point_array = [];
+    var EF_array =[];
     function initialize(){
       var myLatlng = new google.maps.LatLng(24.944, 121.3695);
       var mapOptions = {
@@ -128,6 +129,41 @@
           temp2 = 0;
         }
       }
+
+      function set_EF(boundlist){
+        if(temp3 == 0){
+          for(var i = 0; i < boundlist.length; i++){
+            var fence = [
+            {lat: boundlist[i][0][0], lng: boundlist[i][0][1]},
+            {lat: boundlist[i][1][0], lng: boundlist[i][1][1]},
+            {lat: boundlist[i][2][0], lng: boundlist[i][2][1]},
+            {lat: boundlist[i][3][0], lng: boundlist[i][3][1]}
+            ]; 
+
+            var color = boundlist[i][4];
+          
+            setEF = new google.maps.Polygon({
+              position: {lat: boundlist[i][0][0], lng: boundlist[i][0][1]},
+              path: fence,
+              strokeColor: '#000000',  
+              strokeOpacity: 0.1,  
+              strokeWeight: 1,  
+              fillColor: '#FF0000',  
+              fillOpacity: color *0.2
+            });
+            EF_array.push(setEF);
+            setEF.setMap(map);
+          }
+          temp3 = 1;
+        }
+        else{
+          for(var i = 0; i < boundlist.length; i++){
+            EF_array[i].setMap(null);
+          }
+          EF_array = [];
+          temp3 = 0;
+        }
+      }
 ///////////////////////////////////////////////////////////////////////////////////////
 
 $(function () {
@@ -217,7 +253,7 @@ function toggleSidebar(){
         <input type="submit" onclick="remove_line()" value="刪除歷史路徑">
       </div>
       <div class="set">
-        <input type="submit" onclick="set_area({{ points }})"value="顯示/刪除安全範圍">
+        <input type="submit" onclick="set_EF({{ boundlist }})"value="顯示/刪除電子圍籬">
       </div>
     </nav>
  </div>

@@ -1,31 +1,28 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <title>GPS 定位監控</title>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <title>GPS 定位監控</title>
 
-    <link href="http://terikon.github.io/marker-animate-unobtrusive/demo/unobtrusive/map.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+  <link href="/static/css/history_control.css" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="/static/css/history_menu.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
 
-    <link href="/static/css/history_control.css" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="/static/css/history_menu.css" />
-    <link rel="stylesheet" href="/static/css/master_supervise.css">
-    <link rel="stylesheet" href="/static/css/master_history.css">
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw"></script>
+  <script src="https://code.jquery.com/jquery.min.js"></script>
+  <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/vendor/jquery.easing.1.3.js"></script>
+  <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/vendor/markerAnimate.js"></script>
+  <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/SlidingMarker.js"></script>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw&libraries=geometry"></script>
-    <script src="https://code.jquery.com/jquery.min.js"></script>
-    <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/vendor/jquery.easing.1.3.js"></script>
-    <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/vendor/markerAnimate.js"></script>
-    <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/SlidingMarker.js"></script>
-
-    <!-- MQTT -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
-
-    <script>
-    var map,polyline,area,setarea,set_ana,temp1 = 0, temp2 = 0;
+  <!-- MQTT -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+  <script>
+    var map,polyline,area,setarea,set_ana,temp1 = 0, temp2 = 0, temp3 = 0;
     var polys = [], p;
     var point_array = [];
+    var EF_array =[];
     function initialize(){
       var myLatlng = new google.maps.LatLng(24.944, 121.3695);
       var mapOptions = {
@@ -66,6 +63,37 @@
         polyline.setMap(null);
       }
 
+
+      area = [
+      {lat: 24.947328, lng:121.3712668}, 
+      {lat: 24.9468027, lng:121.3700652},
+      {lat: 24.9455381, lng:121.3680267},
+      {lat: 24.9428532, lng:121.3651085},
+      {lat: 24.9425224, lng:121.364615},
+      {lat: 24.9407324, lng:121.3628983},
+      {lat: 24.9403822, lng:121.3628125},
+      {lat: 24.9394094, lng:121.3628554},
+      {lat: 24.9390786, lng:121.36307},
+      {lat: 24.939137, lng:121.3642716},  
+      {lat: 24.9393121, lng:121.3658595},  
+      {lat: 24.9393705, lng:121.3662887},  
+      {lat: 24.9392148, lng:121.3670397}, 
+      {lat: 24.9395067, lng:121.3675332},  
+      {lat: 24.9397985, lng:121.3678765}, 
+      {lat: 24.9409075, lng:121.3683271}, 
+      {lat: 24.9412188, lng:121.3685632},
+      {lat: 24.9415885, lng:121.3693571}, 
+      {lat: 24.9441567, lng:121.3736701},  
+      {lat: 24.947328, lng:121.3712668}, 
+      ];
+
+      ana = [
+        {lat:24.96, lng:121.33}, //左上
+        {lat:24.96, lng:121.40}, //右上
+        {lat:24.92, lng:121.40}, //右下
+        {lat:24.92, lng:121.33}, //左下
+      ];
+
       function set_area(points){
         if(temp2 == 0){
           var w = 0.00005;
@@ -101,6 +129,41 @@
           temp2 = 0;
         }
       }
+
+      function set_EF(boundlist){
+        if(temp3 == 0){
+          for(var i = 0; i < boundlist.length; i++){
+            var fence = [
+            {lat: boundlist[i][0][0], lng: boundlist[i][0][1]},
+            {lat: boundlist[i][1][0], lng: boundlist[i][1][1]},
+            {lat: boundlist[i][2][0], lng: boundlist[i][2][1]},
+            {lat: boundlist[i][3][0], lng: boundlist[i][3][1]}
+            ]; 
+
+            var color = boundlist[i][4];
+          
+            setEF = new google.maps.Polygon({
+              position: {lat: boundlist[i][0][0], lng: boundlist[i][0][1]},
+              path: fence,
+              strokeColor: '#000000',  
+              strokeOpacity: 0.1,  
+              strokeWeight: 1,  
+              fillColor: '#FF0000',  
+              fillOpacity: color *0.2
+            });
+            EF_array.push(setEF);
+            setEF.setMap(map);
+          }
+          temp3 = 1;
+        }
+        else{
+          for(var i = 0; i < boundlist.length; i++){
+            EF_array[i].setMap(null);
+          }
+          EF_array = [];
+          temp3 = 0;
+        }
+      }
 ///////////////////////////////////////////////////////////////////////////////////////
 
 $(function () {
@@ -115,99 +178,86 @@ function toggleSidebar(){
 </script>
 
 <style src = "style.css"></style>
-
 </head>
-  <body>
-    <div id="wrapper">
-      <header class="navbar u-cf">
-        <div class="container">
-          <div class="title">
-              <h2>管理者模式</h2>
-          </div>
-          <ul class="menu">
-            <li>
-              <a href="{{ url_for('home') }}"><i class ="fas fa-home" ></i>首頁</a>
-            </li>
-            <li>
-              <a href="{{ url_for('master_supervise') }}"><i class ="fas fa-shoe-prints"></i>即時追蹤</a>
-            </li>
-            <li>
-              <a href="{{ url_for('master_history') }}"  class="current"><i class ="fas fa-history" ></i>歷史分析</a>
-            </li>
-            <li>
-              <a href="#person"><i class ="fas fa-cog" ></i>觀看設定</a>
-            </li>
-          </ul>
-        </div>
-      </header>
-      <!-- person -->
-        <div id="person">
-          <form method="post" action= "#people">
-            <div class="cancel">
-              <a href="#"><i class="far fa-times-circle fa-3x" style="color: rgba(256,256,256,0.9);"></i></a>
-            </div>
-            <div class="row">
-              <div class="people_container">
-                <h3 style="text-align: center;">選擇欲觀看人員</h3>
-                <div class="small_container">
-                  <div class="friend-list">
-                    <div class="friends-pic" style="background-image: url('../static/images/user/dn2.jpg')"></div>
-                    <div class="friends">DN2</div>
-                    <input type="submit" name="choose_person" value="DN2" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-      <!-- people -->
-      <div id="people">
-        <div class="cancel">
-          <a href="#"><i class="far fa-times-circle fa-3x" style="color: rgba(256,256,256,0.9);"></i></a>
-        </div>
-        <div class="row">
-          <div class="people_container">
-            <h2 style="text-align: center;">設定</h2>
-            <div class="tool">
-              <form method="POST" action="{{ url_for('master_history_display') }}">
-               {{ select.csrf_token }}
-               <div class="set">
-                {{select.user.label}}
-                <p>DN2</p>
-               </div>
-
-               <div class="set">
-                 {{ select.date.label }}
-                 {{ select.date }}
-               </div>
-
-               <div class="set">
-                 {{ select.begin_time.label }}
-                 {{ select.begin_time }}
-               </div>
-
-               <div class="set">
-                {{ select.duration.label }}
-                 {{ select.duration }}
-               </div>
-
-               <div class="set">
-                 <input type="submit" value="顯示歷史路徑">
-               </div>
-              </form>
-
-              <div class="set">
-                <a href = "#"><input type="submit" onclick="remove_line()" value="刪除歷史路徑" href = "#"></a>
-              </div>
-              <div class="set">
-                <a href="#"><input type="submit" onclick="set_area({{ points }})"value="顯示/刪除安全範圍"></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="map_canvas"></div>
+<body>
+  <div id="sidebar">
+    <div class="toggle-btn" onclick ="toggleSidebar()">
+      <span></span>
+      <span></span>
+      <span></span>
     </div>
-  </body>
-</html>
+    <div class ="user">
+      <i class="fas fa-bars fa-2x" onclick="toggleSidebar()" style = "color:#666666;margin-left:220px;margin-top:10px;"></i>
+      <ul>
+        <li>
+          <div class="circle">
+            <div class="inner" style="background-image: url('{{pic}}');"></div>
+          </div>
+          <p>{{user}}</p> <!-- put user here dynamically -->
+          <!--<a href="{{ url_for('logout') }}">登出</a>-->
+        </li>
+      </ul>
+    </div>
+    <nav class="list">
+      <ul>
+        <li><a href = "{{ url_for('home') }}"><i class ="fas fa-home" ></i>首頁</a></li>
+        <!--<li><a href = "{{ url_for('supervise') }}"><i class ="fas fa-shoe-prints" ></i>嗨</a></li>-->
+      </ul>
+    </nav>
+
+    <nav class="list">
+      <ul>
+        <li><a href = "{{ url_for('supervise') }}"><i class ="fas fa-shoe-prints" ></i>即時追蹤</a></li>
+        <li><a href = "{{ url_for('history') }}" style="color:#EE7700"><i class ="fas fa-history" ></i>歷史分析</a></li>
+      </ul>
+    </nav>
+
+    <nav class ="mid">
+      <ul>
+        <li><a href = "http://localhost:5000/account#account"><i class ="fas fa-sliders-h" ></i>帳戶管理</a></li>
+      </ul>
+    </nav>
+
+    <nav class = "tool">
+      <h3>設定</h3>
+
+     <form method="POST" action="{{ url_for('history_display') }}">
+       {{ select.csrf_token }}
+        <div class="set">
+        {{select.user.label}}
+        {{select.user}}
+        </div>
+        
+        <div class="set">
+         {{ select.date.label }}
+         {{ select.date }}
+        </div>
+        
+        <div class="set">
+         {{ select.begin_time.label }}
+         {{ select.begin_time }}
+        </div>
+        
+        <div class="set">
+         {{ select.duration.label }}
+         {{ select.duration }}
+        </div>
+
+        <div class="set">
+         <input type="submit" value="顯示歷史路徑">
+        </div>
+
+      </form>
+
+      <div class="set">
+        <input type="submit" onclick="remove_line()" value="刪除歷史路徑">
+      </div>
+      <div class="set">
+        <input type="submit" onclick="set_EF({{ boundlist }})"value="顯示/刪除電子圍籬">
+      </div>
+    </nav>
+ </div>
+
+   <div id="map_canvas"></div>
+ </body>
+ </html>

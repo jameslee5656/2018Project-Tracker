@@ -141,10 +141,10 @@ def history():
 		elFence.pullData(user)
 		elFence.onlySanxia()
 		elFence.removeOutlier()
-		elFence.addFrequency()
-		points = elFence.chosePoint()
+		boundlist = elFence.squareBounds()
+		#lis = elFence.chosePoint()
 
-	return render_template('history.html', select = select, user = user, pic = pic, points = points)
+	return render_template('history.html', select = select, user = user, pic = pic, boundlist = boundlist)
 
 
 @app.route("/history/display", methods=['GET','POST'])
@@ -187,12 +187,12 @@ def history_display():
 		elFence.pullData(user)
 		elFence.onlySanxia()
 		elFence.removeOutlier()
-		elFence.addFrequency()
-		points = elFence.chosePoint()
+		boundlist = elFence.squareBounds()
+		#lis = elFence.chosePoint()
 	'''for data in datas:
 		print(data['latitude'], file=sys.stderr)'''
 
-	return render_template('history_display.html', datas = datas, select = select, user = user, pic = pic, points = points)
+	return render_template('history_display.html', datas = datas, select = select, user = user, pic = pic, boundlist = boundlist)
 
 @app.route("/master_history", methods=['GET','POST'])
 def master_history():
@@ -219,11 +219,11 @@ def master_history():
 
 			'''產生電子圍籬'''
 			elFence = electricFence()
-			elFence.pullData(chosen_person)
+			elFence.pullData(user)
 			elFence.onlySanxia()
 			elFence.removeOutlier()
-			elFence.addFrequency()
-			points = elFence.chosePoint()
+			boundlist = elFence.squareBounds()
+			#lis = elFence.chosePoint()
 
 			'''動態產生選項'''
 			dates = []
@@ -234,7 +234,7 @@ def master_history():
 					dates.append(temp_str)
 			select.date.choices = [(date,date) for date in dates]
 
-	return render_template('master_history.html', select = select, user = user, points = points, Friends = Friends, friend_pic = friend_pic, chosen_person = chosen_person)
+	return render_template('master_history.html', select = select, user = user, Friends = Friends, friend_pic = friend_pic, chosen_person = chosen_person, boundlist = boundlist)
 
 @app.route("/history/master_history_display", methods=['GET','POST'])
 def master_history_display():
@@ -273,15 +273,15 @@ def master_history_display():
 
 		'''產生電子圍籬'''
 		elFence = electricFence()
-		elFence.pullData(chosen_person)
+		elFence.pullData(user)
 		elFence.onlySanxia()
 		elFence.removeOutlier()
-		elFence.addFrequency()
-		points = elFence.chosePoint()
+		boundlist = elFence.squareBounds()
+		#lis = elFence.chosePoint()
 	'''for data in datas:
 		print(data['latitude'], file=sys.stderr)'''
 
-	return render_template('master_history_display.html', datas = datas, select = select, user = user, pic = pic, points = points)
+	return render_template('master_history_display.html', datas = datas, select = select, user = user, pic = pic, boundlist = boundlist)
 
 
 @app.route("/test", methods=['GET','POST'])

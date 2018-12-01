@@ -65,14 +65,80 @@ class electricFence():
         return r*math.acos(math.sin(a[0]*op) * math.sin(b[0]*op) + 
                            math.cos(a[0]*op) * math.cos(b[0]*op) * math.cos(a[1]*op-b[1]*op))
     
-    def addFrequency(self):#establish a dict to count how many duplicate location
-        for x in self.location:
-            if tuple(x) in self.frequency:
-                self.frequency[tuple(x)] += 1
-            else:
-                self.frequency[tuple(x)] = 1
+    #establish a dict to count how many duplicate location
+#     def addFrequency(self):
+#         for x in self.location:
+#             if tuple(x) in self.frequency:
+#                 self.frequency[tuple(x)] += 1
+#             else:
+#                 self.frequency[tuple(x)] = 1
                 
     def chosePoint(self):#point without duplicate
-        for x in list(self.frequency.keys()):
-            self.chosenPoint.append(list(x))
+        #map out a tuplelist that it`s element is tuple type
+        tuplelist = list(map(tuple, self.location))
+        self.chosenPoint = list(set(tuplelist))
         return self.chosenPoint
+        # return self.location
+    
+    #make the bounds
+    def squareBounds(self,boundScale = 6):
+        downlat = 24.938590 
+        leftlong = 121.360761
+        toplat = 24.94884
+        rightlong = 121.373937
+
+        temptlist = [[round(x[0],4), round(x[1],4)] for x in self.location]
+
+        squarefreq = {}
+        for i in range(int(round(toplat - downlat,4)*10000)):
+            for j in range(int(round(rightlong - leftlong,4)*10000)):
+        #         print(i,j,tuple([round(downlat + i/10000 ,5), round(leftlong + j/10000,5)]))
+                squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])]=0
+
+        
+        for x in temptlist:
+            if tuple(x) in squarefreq:
+                if round((x[0] - downlat)*10000,0) % boundScale != 0:
+                    if round((x[0] - downlat)*10000,0)% boundScale <= boundScale/2:
+                        x[0] -= (round((x[0] - downlat)*10000,0) % boundScale)/10000
+                    else:
+                        x[0] += (boundScale - (round((x[0] - downlat)*10000,0) % boundScale))
+                    x[0] = round(x[0],4)
+                if round((x[1] - leftlong)*10000,0) % boundScale != 0:
+                    if round((x[0] - leftlong)*10000,0) % boundScale != 0:
+                        x[1] -= (round((x[0] - leftlong)*10000,0) % boundScale)/10000
+                    else:
+                        x[1] += (boundScale - (round((x[0] - leftlong)*10000,0) % boundScale))
+                    x[1] = round(x[1],4)
+                if tuple(x) in squarefreq:
+                    squarefreq[tuple(x)] += 1
+        #         print(tuple(x))
+        # print(max(squarefreq.values()))
+
+        boundlist = []
+        squarefreqMax = math.log10(max(squarefreq.values()))
+        # print(squarefreqMax)
+        for k,values in squarefreq.items():
+            key = list(k)
+            if round((key[0] - downlat)*10000,0) % boundScale == 0:
+                if round((key[1] - leftlong)*10000,0) % boundScale == 0:
+                    lt = [round(key[0] + 0.00005*boundScale,5), round(key[1] - 0.00005*boundScale,5)]
+                    rt = [round(key[0] + 0.00005*boundScale,5), round(key[1] + 0.00005*boundScale,5)]
+                    rd = [round(key[0] - 0.00005*boundScale,5), round(key[1] + 0.00005*boundScale,5)]
+                    ld = [round(key[0] - 0.00005*boundScale,5), round(key[1] - 0.00005*boundScale,5)]
+                #     print(lt,rt,rd,ld)
+                    precentage = 0
+                    if values!=0:
+                        values = math.log10(values)
+                    if(values>=0)and(values<squarefreqMax/5):
+                        precentage = 0
+                    elif (values>=squarefreqMax/5)and(values<2*squarefreqMax/5):
+                        precentage = 1
+                    elif (values>=2*squarefreqMax/5)and(values<3*squarefreqMax/5):
+                        precentage = 2
+                    elif (values>=3*squarefreqMax/5)and(values<4*squarefreqMax/5):
+                        precentage = 3
+                    else:
+                        precentage = 4
+                    boundlist.append([lt,rt,rd,ld,precentage])
+        return boundlist
