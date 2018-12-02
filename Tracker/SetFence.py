@@ -5,7 +5,7 @@ import json
 import matplotlib.pyplot as plt
 import matplotlib.path as mplPath
 import numpy as np
-import urllib.request, json 
+import urllib.request, json
 
 class electricFence():
     def __init__(self):
@@ -78,10 +78,17 @@ class electricFence():
         tuplelist = list(map(tuple, self.location))
         self.chosenPoint = list(set(tuplelist))
         return self.chosenPoint
-        # return self.location
     
     #make the bounds
-    def squareBounds(self,boundScale = 6):
+    def squareBounds(self,boundScale = 1):
+        #checking boundScale
+        if type(boundScale) != 'int':
+            boundScale = int(boundScale)
+        if boundScale < 1:
+            boundScale = 1
+        elif boundScale > 10:
+            boundScale = 10
+            
         downlat = 24.938590 
         leftlong = 121.360761
         toplat = 24.94884
@@ -90,15 +97,16 @@ class electricFence():
         temptlist = [[round(x[0],4), round(x[1],4)] for x in self.location]
 
         squarefreq = {}
+        #make out a dic that is the smallest boundScale = 1
         for i in range(int(round(toplat - downlat,4)*10000)):
             for j in range(int(round(rightlong - leftlong,4)*10000)):
-        #         print(i,j,tuple([round(downlat + i/10000 ,5), round(leftlong + j/10000,5)]))
                 squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])]=0
 
-        
         for x in temptlist:
             if tuple(x) in squarefreq:
+                #the way i think: use mod to divide into two group just like roundup
                 if round((x[0] - downlat)*10000,0) % boundScale != 0:
+                    #less or equal than boundScale/2 = the smaller on 
                     if round((x[0] - downlat)*10000,0)% boundScale <= boundScale/2:
                         x[0] -= (round((x[0] - downlat)*10000,0) % boundScale)/10000
                     else:
@@ -112,12 +120,10 @@ class electricFence():
                     x[1] = round(x[1],4)
                 if tuple(x) in squarefreq:
                     squarefreq[tuple(x)] += 1
-        #         print(tuple(x))
-        # print(max(squarefreq.values()))
 
+        #divide into different percentage
         boundlist = []
         squarefreqMax = math.log10(max(squarefreq.values()))
-        # print(squarefreqMax)
         for k,values in squarefreq.items():
             key = list(k)
             if round((key[0] - downlat)*10000,0) % boundScale == 0:
@@ -126,7 +132,6 @@ class electricFence():
                     rt = [round(key[0] + 0.00005*boundScale,5), round(key[1] + 0.00005*boundScale,5)]
                     rd = [round(key[0] - 0.00005*boundScale,5), round(key[1] + 0.00005*boundScale,5)]
                     ld = [round(key[0] - 0.00005*boundScale,5), round(key[1] - 0.00005*boundScale,5)]
-                #     print(lt,rt,rd,ld)
                     precentage = 0
                     if values!=0:
                         values = math.log10(values)
