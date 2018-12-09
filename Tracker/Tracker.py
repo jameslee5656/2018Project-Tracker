@@ -119,10 +119,14 @@ def master_supervise():
 @app.route("/history", methods=['GET','POST'])
 def history():
 	global select
+	mongo = PyMongo(app)
 	select = Selection()
 	mongo = PyMongo(app)
 	user = "請先登入"
 	pic = '../static/images/user/blank.jpg'
+	FenceScale = 0
+	userlist = []
+	boundlist = []
 	if current_user.is_active:
 		user = current_user.id
 		'''動態產生選項'''
@@ -136,13 +140,30 @@ def history():
 		select.user.choices = [(user,user)]
 		pic = '../static/images/user/' + user + '.jpg'
 
+		'''電子圍籬格子大小選擇'''
+		if request.method == "POST":
+			FenceScale = request.values.get("FenceScale")
+			FenceScale = int(FenceScale)
+
+		'''使用者選擇'''
+		if user == "manager":
+			alluser = mongo.db.User_Info.find()
+			for getuser in alluser:
+				userlist.append(getuser['username'])
+		else:
+			userlist.append(user)
+
+		print(FenceScale, file=sys.stderr)
+		print(userlist, file=sys.stderr)
 		'''產生電子圍籬'''
 		elFence = electricFence()
-		elFence.pullData(user)
+		elFence.pullData(userlist)
 		elFence.onlySanxia()
 		elFence.removeOutlier()
-		boundlist = elFence.squareBounds()
-		#lis = elFence.chosePoint()
+		if FenceScale == 0:
+			boundlist = []
+		else:
+			boundlist = elFence.squareBounds(FenceScale)
 
 	return render_template('history.html', select = select, user = user, pic = pic, boundlist = boundlist)
 
@@ -154,6 +175,10 @@ def history_display():
 	mongo = PyMongo(app)
 	user = "請先登入"
 	pic = '../static/images/user/blank.jpg'
+	FenceScale = 0
+	userlist = []
+	boundlist = []
+
 	if current_user.is_active:
 		user = current_user.id
 		'''動態產生選項'''
@@ -166,7 +191,6 @@ def history_display():
 		select.date.choices = [(date,date) for date in dates]
 		select.user.choices = [(user,user)]
 		pic = '../static/images/user/' + user + '.jpg'
-
 
 		'''顯示歷史軌跡：表單處理'''
 		temp = select.data['date']
@@ -182,13 +206,30 @@ def history_display():
 		else:
 			datas = mongo.db[user].find({'day': day,'month':month,'hour':{"$lt": hour},'hour':{"$gt": begin-1}})
 
+		'''電子圍籬格子大小選擇'''
+		if request.method == "POST":
+			FenceScale = request.values.get("FenceScale")
+			FenceScale = int(FenceScale)
+
+		'''使用者選擇'''
+		if user == "manager":
+			alluser = mongo.db.User_Info.find()
+			for getuser in alluser:
+				userlist.append(getuser['username'])
+		else:
+			userlist.append(user)
+
+		print(FenceScale, file=sys.stderr)
+		print(userlist, file=sys.stderr)
 		'''產生電子圍籬'''
 		elFence = electricFence()
-		elFence.pullData(user)
+		elFence.pullData(userlist)
 		elFence.onlySanxia()
 		elFence.removeOutlier()
-		boundlist = elFence.squareBounds()
-		#lis = elFence.chosePoint()
+		if FenceScale == 0:
+			boundlist = []
+		else:
+			boundlist = elFence.squareBounds(FenceScale)
 	'''for data in datas:
 		print(data['latitude'], file=sys.stderr)'''
 
@@ -203,10 +244,38 @@ def master_history():
 	pic = '../static/images/user/blank.jpg'
 	friend_pic = []
 	points = []
+	FenceScale = 0
+	userlist = []
+	boundlist = []
 	global chosen_person
 	chosen_person = ''
 	if current_user.is_active:
 		user = current_user.id
+
+		'''電子圍籬格子大小選擇'''
+		if request.method == "POST":
+			FenceScale = request.values.get("FenceScale")
+			FenceScale = int(FenceScale)
+
+		'''使用者選擇'''
+		if user == "manager":
+			alluser = mongo.db.User_Info.find()
+			for getuser in alluser:
+				userlist.append(getuser['username'])
+		else:
+			userlist.append(user)
+
+		print(FenceScale, file=sys.stderr)
+		print(userlist, file=sys.stderr)
+		'''產生電子圍籬'''
+		elFence = electricFence()
+		elFence.pullData(userlist)
+		elFence.onlySanxia()
+		elFence.removeOutlier()
+		if FenceScale == 0:
+			boundlist = []
+		else:
+			boundlist = elFence.squareBounds(FenceScale)
 
 		'''產生好友'''
 		Friends = mongo.db.Friend.find({'username': user})[0]['Friends']
@@ -216,14 +285,6 @@ def master_history():
 
 		if request.method == "POST":
 			chosen_person = request.values.get("choose_person")
-
-			'''產生電子圍籬'''
-			elFence = electricFence()
-			elFence.pullData(user)
-			elFence.onlySanxia()
-			elFence.removeOutlier()
-			boundlist = elFence.squareBounds()
-			#lis = elFence.chosePoint()
 
 			'''動態產生選項'''
 			dates = []
@@ -244,6 +305,9 @@ def master_history_display():
 	user = "請先登入"
 	pic = '../static/images/user/blank.jpg'
 	global chosen_person
+	FenceScale = 0
+	userlist = []
+	boundlist = []
 	if current_user.is_active:
 		user = current_user.id
 		'''動態產生選項'''
@@ -271,14 +335,31 @@ def master_history_display():
 		else:
 			datas = mongo.db[chosen_person].find({'day': day,'month':month,'hour':{"$lt": hour},'hour':{"$gt": begin-1}})
 
+		'''電子圍籬格子大小選擇'''
+		if request.method == "POST":
+			FenceScale = request.values.get("FenceScale")
+			FenceScale = int(FenceScale)
+
+		'''使用者選擇'''
+		if user == "manager":
+			alluser = mongo.db.User_Info.find()
+			for getuser in alluser:
+				userlist.append(getuser['username'])
+		else:
+			userlist.append(user)
+
+		print(FenceScale, file=sys.stderr)
+		print(userlist, file=sys.stderr)
 		'''產生電子圍籬'''
 		elFence = electricFence()
-		elFence.pullData(user)
+		elFence.pullData(userlist)
 		elFence.onlySanxia()
 		elFence.removeOutlier()
-		boundlist = elFence.squareBounds()
-		#lis = elFence.chosePoint()
-	'''for data in datas:
+		if FenceScale == 0:
+			boundlist = []
+		else:
+			boundlist = elFence.squareBounds(FenceScale)	
+			'''for data in datas:
 		print(data['latitude'], file=sys.stderr)'''
 
 	return render_template('master_history_display.html', datas = datas, select = select, user = user, pic = pic, boundlist = boundlist)

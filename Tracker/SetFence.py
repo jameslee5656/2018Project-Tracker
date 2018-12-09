@@ -5,7 +5,7 @@ import json
 import matplotlib.pyplot as plt
 import matplotlib.path as mplPath
 import numpy as np
-import urllib.request, json
+import urllib.request, json 
 
 class electricFence():
     def __init__(self):
@@ -14,37 +14,38 @@ class electricFence():
         self.location = []
         self.frequency = {}
         self.chosenPoint = []
-        self.user = ''
+        self.user = []
         
     def pullData(self, user): #pull latitude and longitude
         
-        self.user = user
-        
-        client = MongoClient('120.126.136.17',27017)
-        db = client['Tracker']
-        collection = db[user]
-        cursor = collection.find({})
+        for x in user:
+            self.user = user
 
-        jsonData = [d for d in cursor]
+            client = MongoClient('120.126.136.17',27017)
+            db = client['Tracker']
+            collection = db[x]
+            cursor = collection.find({})
 
-        for x in jsonData:
-            self.latitude.append(float(x['latitude']))
-            self.longitude.append(float(x['longitude']))
+            jsonData = [d for d in cursor]
+
+            for y in jsonData:
+                self.latitude.append(float(y['latitude']))
+                self.longitude.append(float(y['longitude']))
             
     def onlySanxia(self):
         
-        with urllib.request.urlopen("https://sheethub.com/ronnywang/%E9%84%89%E9%8E%AE%E5%B8%82%E5%8D%80%E8%A1%8C%E6%94%BF%E5%8D%80%E5%9F%9F%E7%95%8C%E7%B7%9A/uri/19260593?format=geojson") as url:
-            data = json.loads(url.read().decode())
+        # with urllib.request.urlopen("https://sheethub.com/ronnywang/%E9%84%89%E9%8E%AE%E5%B8%82%E5%8D%80%E8%A1%8C%E6%94%BF%E5%8D%80%E5%9F%9F%E7%95%8C%E7%B7%9A/uri/19260593?format=geojson") as url:
+        #     data = json.loads(url.read().decode())
         
-        # from scipy.spatial import ConvexHull
-        boarderData = data['features'][0]['geometry']['coordinates'][0]
+        # # from scipy.spatial import ConvexHull
+        # boarderData = data['features'][0]['geometry']['coordinates'][0]
         
-        #make out a path
-        borderPath = mplPath.Path(boarderData) 
+        # #make out a path
+        # borderPath = mplPath.Path(boarderData) 
         
         for x in range(len(self.latitude)):
-            if borderPath.contains_points(np.array([[self.longitude[x], self.latitude[x]]])):       
-                self.location.append([round(self.latitude[x],4), round(self.longitude[x],4)])
+            # if borderPath.contains_points(np.array([[self.longitude[x], self.latitude[x]]])):       
+            self.location.append([round(self.latitude[x],4), round(self.longitude[x],4)])   
                 
     def removeOutlier(self):
         #remove that the variance is too large
@@ -98,8 +99,8 @@ class electricFence():
 
         squarefreq = {}
         #make out a dic that is the smallest boundScale = 1
-        for i in range(int(round(toplat - downlat,4)*10000)):
-            for j in range(int(round(rightlong - leftlong,4)*10000)):
+        for i in range(int(round(0.01,4)*10000)):
+            for j in range(int(round(0.01,4)*10000)):
                 squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])]=0
 
         for x in temptlist:
