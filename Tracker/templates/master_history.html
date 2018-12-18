@@ -211,7 +211,7 @@ function toggleSidebar(){
                     <i class="fa fa-caret-down"></i>
                 </a>
                         <ul class="dropdown">
-                            <form method="POST" action="{{ url_for('master_history') }}">
+                            <form id="elctFenceForm" method="POST" action="{{ url_for('master_history') }}">
                                 <div class="set">
                                     <label for="user">分割大小:</label>
                                     <select id="user" name="FenceScale">
@@ -229,7 +229,13 @@ function toggleSidebar(){
                                 </div>
                                 <div class="set">
                                     <!-- <li><a href="#">顯示電子圍籬</a></li> -->
-                                    <input type="submit" value="顯示/刪除電子圍籬">
+                                    <div id="submitElectFence">顯示電子圍籬</div>
+                                    <script type="text/javascript">
+                                        var form = document.getElementById("elctFenceForm");
+                                        document.getElementById("submitElectFence").addEventListener("click", function () {
+                                          form.submit();
+                                        });
+                                    </script>
                                 </div>
                             </form>
                         </ul>

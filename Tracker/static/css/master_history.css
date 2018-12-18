@@ -115,17 +115,6 @@
     visibility: visible;
     top: 100%;
 }
-/*.dropdown form > li > a{
-    display: block;
-    line-height: 24px;
-    padding: 8px 24px;
-    color: #fff;
-    width: 200px;
-    transition: all 0.2s;
-}
-.dropdown > li > a:hover{
-    background-color: #ff5e41;
-}*/
 .set{
     display: block;
     line-height: 24px;

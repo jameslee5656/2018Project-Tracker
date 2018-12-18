@@ -97,8 +97,8 @@ class electricFence():
         elif boundScale > 10:
             boundScale = 10
             
-        downlat = 24.938590 
-        leftlong = 121.360761
+        downlat = 24.939590 
+        leftlong = 121.362861
         toplat = 24.94884
         rightlong = 121.373937
 
@@ -106,8 +106,8 @@ class electricFence():
 
         squarefreq = {}
         #make out a dic that is the smallest boundScale = 1
-        for i in range(int(round(0.01,4)*10000)):
-            for j in range(int(round(0.01,4)*10000)):
+        for i in range(int(round(0.012,4)*10000)):
+            for j in range(int(round(0.012,4)*10000)):
                 squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])]=0
 
         for x in temptlist:
