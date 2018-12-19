@@ -253,7 +253,7 @@ function toggleSidebar(){
         </header>
         <!-- person -->
         <div id="people">
-            <form method="post" action="#people">
+            <form method="post" action="{{ url_for('master_history') }}">
                 <div class="cancel">
                     <a href="#"><i class="far fa-times-circle fa-3x" style="color: rgba(256,256,256,0.9);"></i></a>
                 </div>
@@ -266,7 +266,8 @@ function toggleSidebar(){
                                 <div class="friends-pic" style="background-image: url('{{friend_pic[Friends.index(friend)]}}')"></div>
                                 <div class="friends"> {{friend}}</div>
                                 <div class="check">
-                                    <input type="checkbox">
+                                    <input type="checkbox" value= {{friend}} name="people">
+                                    <span class="checkmark"></span>
                                 </div>
                             </div>
                             {% endfor %}
@@ -275,7 +276,8 @@ function toggleSidebar(){
                                     <p>全部</p>
                                 </div>
                                 <div class="check">
-                                    <input type="checkbox">
+                                    <input type="checkbox" value= all name="people">
+                                    <span class="checkmark"></span>
                                 </div>
                             </div>
                         </div>

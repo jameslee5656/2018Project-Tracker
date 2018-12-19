@@ -280,14 +280,6 @@ a{
 	left: 60px;
 	transform: translateY(-50%);
 }
-
-.check{
-	position: absolute;
-	top: 50%;
-	right: 20px;
-	transform: translateY(-50%);
-}
-
 input[type=checkbox] {
   transform: scale(2);
 }
