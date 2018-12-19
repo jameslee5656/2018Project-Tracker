@@ -251,8 +251,10 @@ def master_history():
     friend_pic = []
     points = []
     FenceScale = 0
+    getuserlist = []
     userlist = []
-    boundlist = []
+    spacelist = []
+    valuelist = []
     global chosen_person
     chosen_person = ''
     if current_user.is_active:
@@ -261,19 +263,29 @@ def master_history():
         '''電子圍籬格子大小選擇'''
         if request.method == "POST":
             FenceScale = request.values.get("FenceScale")
-            FenceScale = int(FenceScale)
+            getuserlist = request.values.getlist("people")
+            if FenceScale != None:       #requst FenceScale
+                userlist = mongo.db.Select_People.find({'username': 'manager'})[0]['selet-people']
+                FenceScale = int(FenceScale)
+                elFence = electricFence()
+                elFence.pullData(userlist)
+                elFence.onlySanxia()
+                elFence.removeOutlier()
+                spacelist,valuelist = elFence.squareBounds(FenceScale)
+            else:
+                if getuserlist[0] == "all":
+                    alluser = mongo.db.User_Info.find()
+                    for getuser in alluser:
+                        getuserlist.append(getuser['username'])
 
-        '''使用者選擇'''
-        if user == "manager":
-            alluser = mongo.db.User_Info.find()
-            for getuser in alluser:
-                userlist.append(getuser['username'])
-        else:
-            userlist.append(user)
+                new = { 'username' : 'manager',
+                        'selet-people' : getuserlist
+                      }
+                de = mongo.db.Select_People.delete_one({'username': 'manager'})
+                mongo.db.Select_People.insert_one(new)
 
-        print(FenceScale, file=sys.stderr)
-        print(userlist, file=sys.stderr)
-        '''產生電子圍籬'''
+        
+        '''產生電子圍籬
         elFence = electricFence()
         elFence.pullData(userlist)
         elFence.onlySanxia()
@@ -282,7 +294,7 @@ def master_history():
             spacelist = []
             valuelist = []
         else:
-            spacelist,valuelist = elFence.squareBounds(FenceScale)
+            spacelist,valuelist = elFence.squareBounds(FenceScale)'''
 
         '''產生好友'''
         Friends = mongo.db.Friend.find({'username': user})[0]['Friends']

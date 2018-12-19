@@ -145,3 +145,12 @@
     opacity: 1;
     visibility: visible;
 }
+.check{
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+}
+input[type=checkbox]:checked .friends{
+    background-color: orange;
+}
