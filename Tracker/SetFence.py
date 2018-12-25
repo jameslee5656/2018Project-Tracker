@@ -88,7 +88,7 @@ class electricFence():
         return self.chosenPoint
     
     #make the bounds
-    def squareBounds(self,boundScale = 1):
+    def squareBounds(self,boundScale = 1,baseLocation = [24.938590,121.360761]):
         #checking boundScale
         if type(boundScale) != 'int':
             boundScale = int(boundScale)
@@ -97,8 +97,8 @@ class electricFence():
         elif boundScale > 10:
             boundScale = 10
             
-        downlat = 24.938590 
-        leftlong = 121.360761
+        downlat = baseLocation[0]#24.938590 
+        leftlong = baseLocation[1]#121.360761
         toplat = 24.94884
         rightlong = 121.373937
 
@@ -106,8 +106,8 @@ class electricFence():
 
         squarefreq = {}
         #make out a dic that is the smallest boundScale = 1
-        for i in range(int(round(0.014,4)*10000)):
-            for j in range(int(round(0.014,4)*10000)):
+        for i in range(int(round(0.01,4)*10000)):
+            for j in range(int(round(0.01,4)*10000)):
                 squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])]=0
 
         for x in temptlist:

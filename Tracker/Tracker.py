@@ -1,5 +1,5 @@
 from __future__ import print_function
-from flask import Flask, render_template,redirect,url_for,request
+from flask import Flask, render_template,redirect,url_for,request,jsonify
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField
 from wtforms.validators import DataRequired
@@ -260,41 +260,20 @@ def master_history():
     if current_user.is_active:
         user = current_user.id
 
-        '''電子圍籬格子大小選擇'''
+        '''電子圍籬格子大小、選人設定'''
         if request.method == "POST":
             FenceScale = request.values.get("FenceScale")
             getuserlist = request.values.getlist("people")
             if FenceScale != None:       #requst FenceScale
-                userlist = mongo.db.Select_People.find({'username': 'manager'})[0]['selet-people']
-                FenceScale = int(FenceScale)
-                elFence = electricFence()
-                elFence.pullData(userlist)
-                elFence.onlySanxia()
-                elFence.removeOutlier()
-                spacelist,valuelist = elFence.squareBounds(FenceScale)
+                mongo.db.Select_People.update_one({'username':'manager'},{'$set':{'FenceScale':FenceScale}})
+                
             else:
                 if getuserlist[0] == "all":
                     alluser = mongo.db.User_Info.find()
                     for getuser in alluser:
                         getuserlist.append(getuser['username'])
+                mongo.db.Select_People.update_one({'username':'manager'},{'$set':{'selet-people':getuserlist}})
 
-                new = { 'username' : 'manager',
-                        'selet-people' : getuserlist
-                      }
-                de = mongo.db.Select_People.delete_one({'username': 'manager'})
-                mongo.db.Select_People.insert_one(new)
-
-        
-        '''產生電子圍籬
-        elFence = electricFence()
-        elFence.pullData(userlist)
-        elFence.onlySanxia()
-        elFence.removeOutlier()
-        if FenceScale == 0:
-            spacelist = []
-            valuelist = []
-        else:
-            spacelist,valuelist = elFence.squareBounds(FenceScale)'''
 
         '''產生好友'''
         Friends = mongo.db.Friend.find({'username': user})[0]['Friends']
@@ -313,7 +292,7 @@ def master_history():
                 if temp_str not in dates:
                     dates.append(temp_str)
             select.date.choices = [(date,date) for date in dates]'''
-
+        
     return render_template('master_history.html', select = select, user = user, Friends = Friends, friend_pic = friend_pic, spacelist = spacelist, valuelist = valuelist)
     # chosen_person = chosen_person,
 
@@ -454,6 +433,24 @@ def logout():
 def delete_friend():
     
     return redirect(url_for('home'))
+
+@app.route('/Move_Fence')
+def Move_Fence():
+    mongo = PyMongo(app)
+    lat = request.args.get('lat', 0, type=float)
+    lng = request.args.get('lng', 0, type=float)
+    baseLocation = [lat-0.005,lng-0.005]
+
+    userlist = mongo.db.Select_People.find({'username': 'manager'})[0]['selet-people']
+    FenceScale = mongo.db.Select_People.find({'username': 'manager'})[0]['FenceScale']
+    FenceScale = int(FenceScale)
+    elFence = electricFence()
+    elFence.pullData(userlist)
+    elFence.onlySanxia()
+    elFence.removeOutlier()
+    spacelist,valuelist = elFence.squareBounds(FenceScale,baseLocation)
+    # print(jsonify(spacelist,valuelist))
+    return jsonify(spacelist,valuelist)
 
 
 if __name__ == '__main__':
