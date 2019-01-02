@@ -95,20 +95,20 @@ a{
 .menu{
 	float: right;
 }
-.menu > li{
+.menu > li {
 	float: left;
 }
-.menu > li > a > i{
+.menu > li  > a > i{
 	padding-right: 3px;
 }
-.menu > li > a{
+.menu > li  > a{
 	display: block;
 	line-height: 18px;
 	padding: 20px 12px;
 	margin-right: 4px;
 	color: #fff;
 }
-.menu > li > a:after{
+.menu > li  > a:after{
 	content: "";
 	position: absolute;
 	width: 0%;

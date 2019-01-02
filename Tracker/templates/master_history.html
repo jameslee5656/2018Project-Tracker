@@ -204,70 +204,65 @@ function toggleSidebar(){
 </head>
 
 <body>
-    <div id="wrapper">
-        <header class="navbar u-cf">
-            <div class="container">
-                <div class="title">
-                    <h2>管理者模式</h2>
+  <div id="wrapper">
+    <header class="navbar u-cf">
+      <div class="container">
+        <div class="title">
+          <h2>管理者模式</h2>
+        </div>
+        <ul class="menu">
+          <li class="four">
+            <a href="{{ url_for('home') }}"><i class ="fas fa-home" ></i>首頁</a>
+          </li>
+          <li class="four">
+            <a href="{{ url_for('master_supervise') }}"><i class ="fas fa-shoe-prints"></i>即時追蹤</a>
+          </li>
+          <li class="four">
+            <a href="{{ url_for('master_history') }}"  class="current"><i class ="fas fa-history" ></i>歷史分析</a>
+          </li>
+          <li class="four">
+            <a href="#people"><i class ="fas fa-cog" ></i>觀看設定</a>
+          </li>
+          <li>
+            <a href="javascript:void(0)" class=setFence>
+              <i class="far fa-object-ungroup fence_down_button"></i>電子圍籬
+              <i class="fa fa-caret-down"></i>
+            </a>
+            <ul class="dropdown">
+              <form id="elctFenceForm" method="POST" action="{{ url_for('master_history') }}">
+                <div class="set">
+                  <label for="user">分割大小:</label>
+                  <select id="user" name="FenceScale">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                  </select>
                 </div>
-                <ul class="menu">
-                    <li>
-                        <a href="{{ url_for('home') }}"><i class ="fas fa-home" ></i>首頁</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('master_supervise') }}"><i class ="fas fa-shoe-prints"></i>即時追蹤</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('master_history') }}"  class="current"><i class ="fas fa-history" ></i>歷史分析</a>
-                    </li>
-                    <li>
-                        <a href="#people"><i class ="fas fa-cog" ></i>觀看設定</a>
-                    </li>
-                    <li>
-                        <a href="javascript:void(0)" class=setFence>
-                    <i class="far fa-object-ungroup fence_down_button"></i>電子圍籬
-                    <i class="fa fa-caret-down"></i>
-                </a>
-                        <ul class="dropdown">
-                            <form id="elctFenceForm" method="POST" action="{{ url_for('master_history') }}">
-                                <div class="set">
-                                    <label for="user">分割大小:</label>
-                                    <select id="user" name="FenceScale">
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                        <option value="6">6</option>
-                                        <option value="7">7</option>
-                                        <option value="8">8</option>
-                                        <option value="9">9</option>
-                                        <option value="10">10</option>
-                                    </select>
-                                </div>
-                                <div class="set">
-                                    <!-- <li><a href="#">顯示電子圍籬</a></li> -->
-                                    <div id="submitElectFence">顯示電子圍籬</div>
-                                    <script type="text/javascript">
-                                        var form = document.getElementById("elctFenceForm");
-                                        document.getElementById("submitElectFence").addEventListener("click", function () {
-                                          form.submit();
-                                        });
-                                    </script>
-                                </div>
-                            </form>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+                <div class="set">
+                  <!-- <li><a href="#">顯示電子圍籬</a></li> -->
+                  <div id="submitElectFence">顯示電子圍籬</div>
+                  <script type="text/javascript">
+                    var form = document.getElementById("elctFenceForm");
+                    document.getElementById("submitElectFence").addEventListener("click", function () {
+                      form.submit();
+                    });
+                  </script>
+                </div>
+              </form>
+            </ul>
+          </li>
+        </ul>
+      </div>
             <!-- <div class="nav_setFence">
             
         </div> -->
-            <div class="w3-bar-block w3-green">
-                <div class="w3-bar-item">London</div>
-                <div class="w3-bar-item">Paris</div>
-                <div class="w3-bar-item">Tokyo</div>
-            </div>
         </header>
         <!-- person -->
         <div id="people">
