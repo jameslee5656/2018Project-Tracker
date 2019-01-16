@@ -31,6 +31,10 @@
     var Global_color = '#000000';
     var Global_spacelist = [];
     var Global_valuelist = [];
+    var Global_fenceScale = 10;
+    var Global_centerlat;
+    var Global_centerlng;
+    var Global_friend_All_Flag = 0;
     function initialize(){
       var myLatlng = new google.maps.LatLng(24.944, 121.3695);
       var mapOptions = {
@@ -47,14 +51,20 @@
       map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
       map.addListener('idle', function() {
         var c = map.getCenter();
-        var lat = map.getCenter().lat(); 
-        var lng = map.getCenter().lng();
+        Global_centerlat = map.getCenter().lat(); 
+        Global_centerlng = map.getCenter().lng();
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
         $.getJSON($SCRIPT_ROOT + '/Move_Fence', {
-            lat : lat,
-            lng : lng
+            lat : Global_centerlat,
+            lng : Global_centerlng,
+            fenceScale : Global_fenceScale
             // send lat, lng through JQuery
         }, function(data){
+            console.log('move change');
+            if(getCookie('FenceColor'))
+            {
+                Global_color = getCookie('FenceColor');
+            }
             // flask send back data through JQuery
           if(fenceInitialize == 0){
             Global_spacelist = data[0];
@@ -70,13 +80,105 @@
           }
         }); 
       });
+
+        // If the fenceScale change change cookie
+        var optionListener = document.getElementById("FenceScaleSelect");
+        optionListener.addEventListener("change", function() {
+
+            var option = optionListener.value;
+            setCookie('FenceScale', option);
+            Global_fenceScale = option;
+            $.getJSON($SCRIPT_ROOT + '/Move_Fence', {
+                lat : Global_centerlat,
+                lng : Global_centerlng,
+                fenceScale : Global_fenceScale
+                // send lat, lng through JQuery
+            }, function(data){
+                if(getCookie('FenceColor'))
+                {
+                    Global_color = getCookie('FenceColor');
+                }
+                // flask send back data through JQuery
+              if(fenceInitialize == 0){
+                Global_spacelist = data[0];
+                Global_valuelist = data[1];
+                set_EF(data[0],data[1],Global_color);
+                fenceInitialize = 1;
+              }
+              else if(fenceInitialize == 1){
+                clear();
+                Global_spacelist = data[0];
+                Global_valuelist = data[1];
+                set_EF(data[0],data[1],Global_color);
+              }
+            });
+
+            var fenceScale;
+            if(getCookie('FenceScale'))
+            {
+                fenceScale = getCookie('FenceScale');
+            }
+            else
+            {
+                fenceScale = 10;
+            }
+            Global_fenceScale = fenceScale;
+            $('#FenceScaleDefault').text(fenceScale);
+        });
+
+        var fenceScale;
+        if(getCookie('FenceScale'))
+        {
+            fenceScale = getCookie('FenceScale');
+        }
+        else
+        {
+            fenceScale = 10;
+        }
+        Global_fenceScale = fenceScale;
+        $('#FenceScaleDefault').text(fenceScale);
+        // Set FenceScale to be the cookie
+        
+        document.getElementById("friendAll").addEventListener("click", function () {
+            if(Global_friend_All_Flag == 1){
+                Global_friend_All_Flag = 0;
+            }
+            else{
+                Global_friend_All_Flag = 1;
+            }
+            // console.log(Global_friend_All_Flag);
+            if(Global_friend_All_Flag == 1){
+                document.getElementsByClassName("friend_check").after = true;
+            }
+            else
+            {
+                document.getElementsByClassName("friend_check").checked = false;
+            }
+            console.log(document.getElementsByClassName("friend_check").checked)
+        });
+        console.log('here');
+        
     }
     
     function setCookie(name, value)
     {
-        var today = new Data();
-        var expiry = new Date(today.getTime() + 30 * 24 * 3600 *1000);
-        document.cookie=name+"="+escape(value)+"; path=/; expires=" + expiry.toGMTString();
+        document.cookie=name+"="+escape(value)+"; path=/;";
+    }
+
+    function getCookie(cname) {
+      var name = cname + "=";
+      var decodedCookie = decodeURIComponent(document.cookie);
+      var ca = decodedCookie.split(';');
+      for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
     }
 
     function setline(){
@@ -86,7 +188,6 @@
       var temp = {lat: {{data.latitude}}, lng: {{data.longitude}}};
       points.push(temp);
       {% endfor %}
-      console.log(points);
       if(!polyline){
         polyline = new google.maps.Polyline({
           path: points,
@@ -199,14 +300,14 @@
       function setTextColor(picker) {
         var color = '#' + picker.toString();
         if(fenceInitialize== 1){
-            console.log(fenceInitialize);
             clear();
             Global_color = color;
+            setCookie('FenceColor',Global_color)
             set_EF(Global_spacelist,Global_valuelist,Global_color);
         }
         else if(fenceInitialize == 0){
-            console.log(fenceInitialize);
             Global_color = color;
+            setCookie('FenceColor',Global_color)
             set_EF(Global_spacelist,Global_valuelist,Global_color);
             fenceInitialize=1;
         }
@@ -216,7 +317,6 @@
 
 $(function () {
   initialize(null);
-  console.log("func");
   // set_EF({{spacelist}},{{valuelist}},'#000000');
 });
 
@@ -254,36 +354,37 @@ function toggleSidebar(){
               <i class="fa fa-caret-down"></i>
             </a>
             <ul class="dropdown">
-              <form id="elctFenceForm" method="POST" action="{{ url_for('master_history') }}">
-                <div class="set">
-                  <!-- <li><a href="#">顯示電子圍籬</a></li> -->
-                  <div id="submitElectFence">顯示電子圍籬</div>
-                  <script type="text/javascript">
-                    var form = document.getElementById("elctFenceForm");
-                    document.getElementById("submitElectFence").addEventListener("click", function () {
-                      form.submit();
-                    });
-                  </script>
-                </div>
-                <div class="set">
-                  <label for="user">分割大小:</label>
-                  <select id="user" name="FenceScale">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                  </select>
-                </div>
-                <div class="set">
-                    <button class="jscolor {valueElement:'chosen-value', onFineChange:'setTextColor(this)'}">選擇電子圍籬顏色</button>
-                </div>
-              </form>
+              <!-- <form id="elctFenceForm" method="POST" action="{{ url_for('master_history') }}"> -->
+            <div class="set">
+              <!-- <li><a href="#">顯示電子圍籬</a></li> -->
+              <div id="submitElectFence">刪除電子圍籬</div>
+              <script type="text/javascript">
+                document.getElementById("submitElectFence").addEventListener("click", function () {
+                    clear();
+                    fenceInitialize=0;
+                });
+              </script>
+            </div>
+            <div class="set">
+              <label for="FenceScaleSelect">分割大小:</label>
+              <select id="FenceScaleSelect" name="FenceScale">
+                <option id="FenceScaleDefault" selected="selected"></option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </select>
+            </div>
+            <div class="set">
+                <button class="jscolor {valueElement:'chosen-value', onFineChange:'setTextColor(this)'}">選擇電子圍籬顏色</button>
+            </div>
+              <!-- </form> -->
             </ul>
           </li>
         </ul>
@@ -302,25 +403,25 @@ function toggleSidebar(){
                     <div class="people_container">
                         <h3 style="text-align: center;">個人</h3>
                         <div class="small_container">
-                            {% for friend in Friends %}
-                            <div class="friend-list">
-                                <div class="friends-pic" style="background-image: url('{{friend_pic[Friends.index(friend)]}}')"></div>
-                                <div class="friends"> {{friend}}</div>
-                                <div class="check">
-                                    <input type="checkbox" value= {{friend}} name="people">
-                                    <span class="checkmark"></span>
-                                </div>
-                            </div>
-                            {% endfor %}
                             <div class="friend-list">
                                 <div class="friends-pic">
                                     <p>全部</p>
                                 </div>
                                 <div class="check">
-                                    <input type="checkbox" value= all name="people">
+                                    <input type="checkbox" id="friendAll" name="people">
                                     <span class="checkmark"></span>
                                 </div>
                             </div>
+                            {% for friend in Friends %}
+                            <div class="friend-list">
+                                <div class="friends-pic" style="background-image: url('{{friend_pic[Friends.index(friend)]}}')"></div>
+                                <div class="friends"> {{friend}}</div>
+                                <div class="check">
+                                    <input class="friend_check" type="checkbox" value= {{friend}} name="people">
+                                    <span class="checkmark"></span>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                         <div class="confirm">
                             <input type="submit" value="確定">

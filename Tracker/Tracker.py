@@ -249,52 +249,28 @@ def master_history():
     user = "請先登入"
     pic = '../static/images/user/blank.jpg'
     friend_pic = []
-    points = []
     FenceScale = 0
     getuserlist = []
-    userlist = []
     spacelist = []
     valuelist = []
-    global chosen_person
-    chosen_person = ''
     if current_user.is_active:
         user = current_user.id
 
         '''電子圍籬格子大小、選人設定'''
         if request.method == "POST":
-            FenceScale = request.values.get("FenceScale")
             getuserlist = request.values.getlist("people")
-            if FenceScale != None:       #requst FenceScale
-                mongo.db.Select_People.update_one({'username':'manager'},{'$set':{'FenceScale':FenceScale}})
-                
-            else:
-                if getuserlist[0] == "all":
-                    alluser = mongo.db.User_Info.find()
-                    for getuser in alluser:
-                        getuserlist.append(getuser['username'])
-                mongo.db.Select_People.update_one({'username':'manager'},{'$set':{'selet-people':getuserlist}})
-
+            if getuserlist[0] == "all":
+                alluser = mongo.db.User_Info.find()
+                for getuser in alluser:
+                    getuserlist.append(getuser['username'])
+            mongo.db.Select_People.update_one({'username':'manager'},{'$set':{'selet-people':getuserlist}})
 
         '''產生好友'''
         Friends = mongo.db.Friend.find({'username': user})[0]['Friends']
         for friend in Friends:
             temp = '../static/images/user/' + friend + '.jpg'
-            friend_pic.append(temp)
-
-        '''if request.method == "POST":
-            chosen_person = request.values.get("choose_person")
-
-            #動態產生選項
-            dates = []
-            checks = mongo.db[chosen_person].find({})
-            for check in checks:
-                temp_str = str(check['month']) + '/' + str(check['day'])
-                if temp_str not in dates:
-                    dates.append(temp_str)
-            select.date.choices = [(date,date) for date in dates]'''
-        
+            friend_pic.append(temp)        
     return render_template('master_history.html', select = select, user = user, Friends = Friends, friend_pic = friend_pic, spacelist = spacelist, valuelist = valuelist)
-    # chosen_person = chosen_person,
 
 @app.route("/history/master_history_display", methods=['GET','POST'])
 def master_history_display():
@@ -431,19 +407,19 @@ def logout():
 
 @app.route("/delete_friend/")
 def delete_friend():
-    
     return redirect(url_for('home'))
 
 @app.route('/Move_Fence')
 def Move_Fence():
     mongo = PyMongo(app)
+    fenceScale = request.args.get('fenceScale', 0, type=float)
     lat = request.args.get('lat', 0, type=float)
     lng = request.args.get('lng', 0, type=float)
     baseLocation = [lat-0.005,lng-0.005]
 
     userlist = mongo.db.Select_People.find({'username': 'manager'})[0]['selet-people']
-    FenceScale = mongo.db.Select_People.find({'username': 'manager'})[0]['FenceScale']
-    FenceScale = int(FenceScale)
+    #FenceScale = mongo.db.Select_People.find({'username': 'manager'})[0]['FenceScale']
+    FenceScale = int(fenceScale)
     elFence = electricFence()
     elFence.pullData(userlist)
     elFence.onlySanxia()
