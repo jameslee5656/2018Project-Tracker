@@ -8,6 +8,10 @@ from forms import Selection,Register,Login, Log_out, Delete_friend, Supervise_ch
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from SetFence import electricFence
 import sys
+from PIL import Image
+import requests
+from io import BytesIO
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://120.126.136.17:27017/Tracker"
@@ -249,10 +253,9 @@ def master_history():
     user = "請先登入"
     pic = '../static/images/user/blank.jpg'
     friend_pic = []
-    FenceScale = 0
+    Friends = []
+    CheckedFriend = {}
     getuserlist = []
-    spacelist = []
-    valuelist = []
     if current_user.is_active:
         user = current_user.id
 
@@ -267,10 +270,18 @@ def master_history():
 
         '''產生好友'''
         Friends = mongo.db.Friend.find({'username': user})[0]['Friends']
+        SeletedPeople = mongo.db.Select_People.find({'username': 'manager'})[0]['selet-people']
         for friend in Friends:
+            '''產生是否勾選'''
+            if friend in SeletedPeople:
+                CheckedFriend[friend] = 1
+            else:
+                CheckedFriend[friend] = 0
+            
+            '''產生好友圖片'''
             temp = '../static/images/user/' + friend + '.jpg'
-            friend_pic.append(temp)        
-    return render_template('master_history.html', select = select, user = user, Friends = Friends, friend_pic = friend_pic, spacelist = spacelist, valuelist = valuelist)
+            friend_pic.append(temp)
+    return render_template('master_history.html', select = select, Friends = Friends, friend_pic = friend_pic, CheckedFriend = CheckedFriend)
 
 @app.route("/history/master_history_display", methods=['GET','POST'])
 def master_history_display():
@@ -425,7 +436,18 @@ def Move_Fence():
     elFence.onlySanxia()
     elFence.removeOutlier()
     spacelist,valuelist = elFence.squareBounds(FenceScale,baseLocation)
-    # print(jsonify(spacelist,valuelist))
+    key = 'AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw'#api key
+    name = 0;
+    for i in valuelist[:10]:
+        base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
+        MyUrl = base + str(round(float(i[0][0])+ 0.00005,5))+',' + str(round(float(i[0][1])+ 0.00005,5)) + '&key=' + key  #added url encoding
+        response = requests.get(MyUrl)
+        print(MyUrl)
+        img = Image.open(BytesIO(response.content))
+        img.save( 'static/images/streetview/' + str(name) + ".jpg", "JPEG", quality=80, 
+            optimize=True, progressive=True)
+        name += 1
+    print("return", file=sys.stderr)
     return jsonify(spacelist,valuelist)
 
 

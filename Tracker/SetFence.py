@@ -43,11 +43,14 @@ class electricFence():
                     data = root[i][0][1][0][0][0][0][0][0].text
         data = data.split(' ')
         boardData = []
+        sacrifice = 0
         for x in data:
             x = x.split(',')
             x[0] = float(x[0])
             x[1] = float(x[1])
-            boardData.append([x[0],x[1]])
+            if sacrifice % 10 == 0:    
+                boardData.append([x[0],x[1]])
+            sacrifice += 1
         borderPath = mplPath.Path(boardData)
         
         for x in range(len(self.latitude)):
@@ -136,6 +139,7 @@ class electricFence():
             squarefreqMax = math.log10(max(squarefreq.values()))
         for k,values in squarefreq.items():
             key = list(k)
+            org_values = values
             if round((key[0] - downlat)*10000,0) % boundScale == 0:
                 if round((key[1] - leftlong)*10000,0) % boundScale == 0:
                     lt = [round(key[0] + 0.00005*boundScale,5), round(key[1] - 0.00005*boundScale,5)]
@@ -155,7 +159,7 @@ class electricFence():
                         precentage = 3
                     else:
                         precentage = 4
-                    boundlist.append([lt,rt,rd,ld,precentage])
+                    boundlist.append([lt,rt,rd,ld,precentage,org_values])
                     
         squarelen = int(math.sqrt(len(boundlist)))
         spacelist = []
@@ -199,5 +203,12 @@ class electricFence():
         for x in boundlist:
             if x[4] != 0:
                 valuelist.append(x)
-        
-        return spacelist,valuelist
+        valuelist = sorted(valuelist,key=lambda x: x[5],reverse=True)
+#         sortNum = 1
+        newlist = []
+        for x in valuelist:
+            tempt = x[0:6]
+#             tempt.append(sortNum)
+#             sortNum += 1
+            newlist.append(tempt)
+        return spacelist,newlist 

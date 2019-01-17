@@ -22,19 +22,21 @@
     <script src="/static/js/jscolor.js"></script>
     <script>window.jQuery || document.write('<script src="{{ url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
     <script>
-    var map,polyline,area,setarea,set_ana,setEF,setEF1,temp1 = 0, temp2 = 0, fenceInitialize = 0, spacelng = 0, valuelng = 0;
+    var map,polyline,area,setarea,set_ana,setEF,setEF1,marker,num,keypoint,temp1 = 0, temp2 = 0, fenceInitialize = 0, spacelng = 0, valuelng = 0, filenumber = 0;
     // fenceInitialize = temp3 =>> whether the fence have been draw before
+    var numbers = '12345678910';
+    var counter = 0;
     var polys = [], p;
     var point_array = [];
     var EF_array =[];
     var EF_array1 = [];
+    var number_array = [];
     var Global_color = '#000000';
     var Global_spacelist = [];
     var Global_valuelist = [];
     var Global_fenceScale = 10;
     var Global_centerlat;
     var Global_centerlng;
-    var Global_friend_All_Flag = 0;
     function initialize(){
       var myLatlng = new google.maps.LatLng(24.944, 121.3695);
       var mapOptions = {
@@ -138,25 +140,6 @@
         Global_fenceScale = fenceScale;
         $('#FenceScaleDefault').text(fenceScale);
         // Set FenceScale to be the cookie
-        
-        document.getElementById("friendAll").addEventListener("click", function () {
-            if(Global_friend_All_Flag == 1){
-                Global_friend_All_Flag = 0;
-            }
-            else{
-                Global_friend_All_Flag = 1;
-            }
-            // console.log(Global_friend_All_Flag);
-            if(Global_friend_All_Flag == 1){
-                document.getElementsByClassName("friend_check").after = true;
-            }
-            else
-            {
-                document.getElementsByClassName("friend_check").checked = false;
-            }
-            console.log(document.getElementsByClassName("friend_check").checked)
-        });
-        console.log('here');
         
     }
     
@@ -283,10 +266,41 @@
             fillColor: Global_color,  
             fillOpacity: 0.1*c
           });
+
+          if(i < 10){
+            num = numbers[i];
+            if(i == 9){
+              num = '10';
+            }
+            var latt = valuelist[i][0][0] + (valuelist[i][3][0] - valuelist[i][0][0])/2;
+            var lngg = valuelist[i][0][1] + (valuelist[i][1][1] - valuelist[i][0][1])/2;
+            keypoint = 
+            {lat: latt, lng: lngg};
+            marker = new google.maps.Marker({
+              position: keypoint,
+              map: map,
+              label: num
+            });
+            marker.setMap(map);
+            number_array.push(marker);
+
+            createRoute(setEF1,counter);
+
+            google.maps.event.addListener(setEF1,'mouseover',function(){
+              this.setOptions({strokeColor: '#000000',strokeOpacity: 1, strokeWeight:2});
+           }); 
+            google.maps.event.addListener(setEF1,'mouseout',function(){
+             this.setOptions({strokeOpacity: 0});
+           }); 
+          }
+
           EF_array1.push(setEF1);
           setEF1.setMap(map);
+          counter++;
         }
       }
+
+      
       function clear(){
         for(var i = 0; i < spacelng; i++){
             EF_array[i].setMap(null);
@@ -294,8 +308,13 @@
           for(var i = 0; i < valuelng; i++){
             EF_array1[i].setMap(null);
           }
+          for(var i = 0; i < 10; i++){
+            number_array[i].setMap(null);
+          }
+          number_array = [];
           EF_array = [];
           EF_array1 = [];
+          counter = 0;
       }
       function setTextColor(picker) {
         var color = '#' + picker.toString();
@@ -311,6 +330,20 @@
             set_EF(Global_spacelist,Global_valuelist,Global_color);
             fenceInitialize=1;
         }
+      }
+
+      function remove(){
+        $('#showpic-con').removeClass('showpic-con');
+      }
+
+      function createRoute(marker, routenum){
+        google.maps.event.addListener(marker,'click',function(){
+              var route0 = "url('../static/images/streetview/";
+              var route1 = ".jpg?t=" + Math.random() + "')";
+              var route = route0 + routenum + route1;
+              document.getElementById('pic-container').style.backgroundImage = route;
+              $('#showpic-con').addClass('showpic-con');
+           }); 
       }
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -411,17 +444,30 @@ function toggleSidebar(){
                                     <input type="checkbox" id="friendAll" name="people">
                                     <span class="checkmark"></span>
                                 </div>
+                                <script type="text/javascript">
+                                     $("#friendAll").click(function () {
+                                        $(".friend_check").prop('checked', $(this).prop('checked'));
+                                    });
+                                </script>
                             </div>
                             {% for friend in Friends %}
                             <div class="friend-list">
                                 <div class="friends-pic" style="background-image: url('{{friend_pic[Friends.index(friend)]}}')"></div>
                                 <div class="friends"> {{friend}}</div>
                                 <div class="check">
-                                    <input class="friend_check" type="checkbox" value= {{friend}} name="people">
+                                    <input class="friend_check" type="checkbox" value= {{friend}} name="people" id={{friend}}>
                                     <span class="checkmark"></span>
                                 </div>
                             </div>
+                            <script type="text/javascript">
+                                if({{CheckedFriend[friend]}})
+                                {
+                                    console.log({{friend}}.id);
+                                    document.getElementById({{friend}}.id).checked = true;
+                                }
+                            </script>
                             {% endfor %}
+
                         </div>
                         <div class="confirm">
                             <input type="submit" value="確定">
@@ -471,6 +517,10 @@ function toggleSidebar(){
                 </div>
             </div>
         </div> -->
+        <div id="showpic-con">
+            <div class="cancel" onclick="remove()"><i class="fas fa-times fa-2x" style="color: rgba(0,0,0,0.6); cursor: pointer;"></i></div>
+            <div class="pic-con" id="pic-container"></div>
+          </div>
         <div id="map_canvas"></div>
     </div>
 </body>
