@@ -328,7 +328,7 @@
       }
 
       function remove(){
-        $('#showpic-con').removeClass('showpic-con');
+        $('#showpic-con-2').removeClass('showpic-con-2');
       }
 
       function createRoute(marker, routenum){
@@ -336,8 +336,8 @@
               var route0 = "url('../static/images/streetview/";
               var route1 = ".jpg?t=" + Math.random() + "')";
               var route = route0 + routenum + route1;
-              document.getElementById('pic-container').style.backgroundImage = route;
-              $('#showpic-con').addClass('showpic-con');
+              document.getElementById('pic-container-2').style.backgroundImage = route;
+              $('#showpic-con-2').addClass('showpic-con-2');
            }); 
       }
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -420,34 +420,39 @@ function toggleSidebar(){
         </nav>
         <nav class="tool">
             <h3>電子圍籬</h3>
-            <form method="POST" action="{{ url_for('history') }}">
-                <div class="set">
-                    <label for="user">分割大小:</label>
-                    <select id="user" name="FenceScale">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                    </select>
-                </div>
-                <div class="set">
-                    <input type="submit" value="顯示/刪除電子圍籬">
-                </div>
-            </form>
+            <div class="set">
+                <label for="FenceScaleSelect">分割大小:</label>
+                <select id="FenceScaleSelect" name="FenceScale">
+                    <option id="FenceScaleDefault" selected="selected"></option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+            <div class="set">
+                <input type="submit" id='clearElectFence' value="刪除電子圍籬">
+                <script type="text/javascript">
+                document.getElementById("clearElectFence").addEventListener("click", function () {
+                    clear();
+                    fenceInitialize=0;
+                });
+              </script>
+            </div>
             <div class="set">
                 <button class="jscolor {valueElement:'chosen-value', onFineChange:'setTextColor(this)'}">選擇電子圍籬顏色</button>
             </div>
         </nav>
     </div>
-    <div id="showpic-con">
-        <div class="cancel" onclick="remove()"><i class="fas fa-2x" style="color: rgba(0,0,0,0.6); cursor: pointer;"></i></div>
-        <div class="pic-con" id="pic-container"></div>
+    <div id="showpic-con-2">
+        <div class="cancel" onclick="remove()"><i class="fas fa-times fa-2x" style="color: rgba(0,0,0,0.6); cursor: pointer;"></i></div>
+        <div class="pic-con" id="pic-container-2"></div>
     </div>
     <div id="map_canvas"></div>
 </body>

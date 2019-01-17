@@ -241,3 +241,32 @@
 	padding-top: 5px;
 	padding-left: 33px;
 }
+
+.showpic-con-2{
+    position: fixed;
+    width: 60%;
+    height: 70%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: #fff;
+    z-index: 100;
+    border: 5px solid rgba(0,0,0,0.6);
+    border-radius: 5px;
+}
+
+.pic-con{
+    position: fixed;
+    width: 95%;
+    height: 80%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-image: url('');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.cancel{
+    height: 0;
+}
