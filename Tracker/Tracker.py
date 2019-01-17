@@ -442,7 +442,6 @@ def Move_Fence():
         base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
         MyUrl = base + str(round(float(i[0][0])+ 0.00005,5))+',' + str(round(float(i[0][1])+ 0.00005,5)) + '&key=' + key  #added url encoding
         response = requests.get(MyUrl)
-        print(MyUrl)
         img = Image.open(BytesIO(response.content))
         img.save( 'static/images/streetview/' + str(name) + ".jpg", "JPEG", quality=80, 
             optimize=True, progressive=True)
