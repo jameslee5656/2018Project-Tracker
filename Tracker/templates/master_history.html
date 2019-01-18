@@ -284,7 +284,7 @@
             marker.setMap(map);
             number_array.push(marker);
 
-            createRoute(setEF1,counter);
+            createRoute(setEF1,counter,valuelist);
 
             google.maps.event.addListener(setEF1,'mouseover',function(){
               this.setOptions({strokeColor: '#000000',strokeOpacity: 1, strokeWeight:2});
@@ -336,14 +336,24 @@
         $('#showpic-con').removeClass('showpic-con');
       }
 
-      function createRoute(marker, routenum){
+      function createRoute(marker, routenum, valuelist){
         google.maps.event.addListener(marker,'click',function(){
-              var route0 = "url('../static/images/streetview/";
-              var route1 = ".jpg?t=" + Math.random() + "')";
-              var route = route0 + routenum + route1;
-              document.getElementById('pic-container').style.backgroundImage = route;
-              $('#showpic-con').addClass('showpic-con');
-           }); 
+           //    var route0 = "url('../static/images/streetview/";
+           //    var route1 = ".jpg?t=" + Math.random() + "')";
+           //    var route = route0 + routenum + route1;
+              // document.getElementById('pic-container').style.backgroundImage = route;
+            var fenway = {lat : valuelist[routenum][0][0] - 0.0005,lng : valuelist[routenum][0][1] + 0.0005}; 
+            var panorama = new google.maps.StreetViewPanorama(
+              document.getElementById('pic-container'), {
+                position: fenway,
+                pov: {
+                  heading: 34,
+                  pitch: 10
+                }
+              });
+            map.setStreetView(panorama);
+            $('#showpic-con').addClass('showpic-con'); 
+        });
       }
 ///////////////////////////////////////////////////////////////////////////////////////
 

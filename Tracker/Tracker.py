@@ -436,7 +436,7 @@ def Move_Fence():
     elFence.onlySanxia()
     elFence.removeOutlier()
     spacelist,valuelist = elFence.squareBounds(FenceScale,baseLocation)
-    key = 'AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw'#api key
+    '''key = 'AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw'#api key
     name = 0;
     for i in valuelist[:10]:
         base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
@@ -446,7 +446,7 @@ def Move_Fence():
         img.save( 'static/images/streetview/' + str(name) + ".jpg", "JPEG", quality=80, 
             optimize=True, progressive=True)
         name += 1
-    print("return", file=sys.stderr)
+    print("return", file=sys.stderr)'''
     return jsonify(spacelist,valuelist)
 
 
