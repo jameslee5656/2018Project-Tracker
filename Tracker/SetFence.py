@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.path as mplPath
 import numpy as np
 import urllib.request, json
+from datetime import datetime
 
 class electricFence():
     def __init__(self):
@@ -17,7 +18,7 @@ class electricFence():
         self.chosenPoint = []
         self.user = []
         
-    def pullData(self, user): #pull latitude and longitude
+    def pullData(self, user, minDate = 1514736000000, maxDate = 1546272000000): #pull latitude and longitude
         
         for x in user:
             self.user = user
@@ -28,10 +29,14 @@ class electricFence():
             cursor = collection.find({})
 
             jsonData = [d for d in cursor]
-
             for y in jsonData:
-                self.latitude.append(float(y['latitude']))
-                self.longitude.append(float(y['longitude']))
+                dateStr = str(y['year']) + ':' + str(y['month']) + ':' + str(y['day']) + ':' \
+                         + str(y['hour']) + ':' + str(y['minute']) + ':' + str(y['second'])
+                datetime_object = datetime.strptime(dateStr, '%Y:%m:%d:%H:%M:%S')
+                date_float = datetime_object.timestamp() * 1000
+                if((date_float >= minDate) and (date_float <= maxDate)):
+                    self.latitude.append(float(y['latitude']))
+                    self.longitude.append(float(y['longitude']))
             
     def onlySanxia(self):
 #         Too slow

@@ -450,5 +450,36 @@ def Move_Fence():
     return jsonify(spacelist,valuelist)
 
 
+@app.route('/change_Date')
+def change_Date():
+    mongo = PyMongo(app)
+    startDate = request.args.get('startDate', 0, type=float)
+    endDate = request.args.get('endDate', 0, type=float)
+    fenceScale = request.args.get('fenceScale', 0, type=float)
+    lat = request.args.get('lat', 0, type=float)
+    lng = request.args.get('lng', 0, type=float)
+    baseLocation = [lat-0.005,lng-0.005]
+
+    userlist = mongo.db.Select_People.find({'username': 'manager'})[0]['selet-people']
+    FenceScale = mongo.db.Select_People.find({'username': 'manager'})[0]['FenceScale']
+    FenceScale = int(fenceScale)
+    elFence = electricFence()
+    elFence.pullData(userlist,startDate,endDate)
+    elFence.onlySanxia()
+    elFence.removeOutlier()
+    spacelist,valuelist = elFence.squareBounds(FenceScale,baseLocation)
+    # '''key = 'AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw'#api key
+    # name = 0;
+    # for i in valuelist[:10]:
+    #     base = "https://maps.googleapis.com/maps/api/streetview?size=1200x800&location="
+    #     MyUrl = base + str(round(float(i[0][0])+ 0.00005,5))+',' + str(round(float(i[0][1])+ 0.00005,5)) + '&key=' + key  #added url encoding
+    #     response = requests.get(MyUrl)
+    #     img = Image.open(BytesIO(response.content))
+    #     img.save( 'static/images/streetview/' + str(name) + ".jpg", "JPEG", quality=80, 
+    #         optimize=True, progressive=True)
+    #     name += 1
+    # print("return", file=sys.stderr)'''
+    return jsonify(spacelist,valuelist)
+
 if __name__ == '__main__':
     app.run(host = "localhost",debug=True)
