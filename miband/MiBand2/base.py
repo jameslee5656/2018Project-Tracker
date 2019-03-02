@@ -63,6 +63,9 @@ class AuthenticationDelegate(DefaultDelegate):
             elif data[:3] == b'\x10\x02\x01':
                 self.device.active = False
                 return
+            elif data[:3] == b'\x10\x01\x02':
+                print('hnd 65 failure unknown')
+                return
             else:
                 print("Unexpected data on handle " + str(hnd) + ": " + str(data))
                 return

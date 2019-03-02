@@ -33,7 +33,7 @@ def b(x):
 def f(x):
     print('Raw accel heart:', x)
 
-for i in range(1):
+for i in range(10):
 	start_time = time.time()
 	deviceslist = []
 	scanner = Scanner().withDelegate(ScanDelefate())
@@ -89,7 +89,7 @@ for i in range(1):
 		            heart_measure_callback=l,
 		            heart_raw_callback=b,
 		            accel_raw_callback=f)
-
+				time.sleep(0.1)
 				band.disconnect()
 				break
 		except Exception:
