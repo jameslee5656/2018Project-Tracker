@@ -162,6 +162,8 @@ class electricFence():
                         precentage = 2
                     elif (values>=3*squarefreqMax/5)and(values<4*squarefreqMax/5):
                         precentage = 3
+                    elif (squarefreqMax == 0):
+                        precentage = 0
                     else:
                         precentage = 4
                     boundlist.append([lt,rt,rd,ld,precentage,org_values])

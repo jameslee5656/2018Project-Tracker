@@ -56,13 +56,25 @@
         fullscreenControl: false,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       }
+      if(getCookie('StartDate')){
+        console.log("get cookie");
+        Global_date[0] = getCookie('StartDate');
+        Global_date[1] = getCookie('EndDate');
+      }
+      else{
+        console.log("get date");
+        Global_date[0] = new Date('2018.01.01').getTime();
+        Global_date[1] = new Date().getTime();
+      }
       map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
       map.addListener('idle', function() {
         var c = map.getCenter();
         Global_centerlat = map.getCenter().lat(); 
         Global_centerlng = map.getCenter().lng();
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-        $.getJSON($SCRIPT_ROOT + '/Move_Fence', {
+        $.getJSON($SCRIPT_ROOT + '/change_Date', {
+          startDate : Global_date[0],
+          endDate : Global_date[1],
           lat : Global_centerlat,
           lng : Global_centerlng,
           fenceScale : Global_fenceScale
@@ -96,7 +108,9 @@
           var option = optionListener.value;
           setCookie('FenceScale', option);
           Global_fenceScale = option;
-          $.getJSON($SCRIPT_ROOT + '/Move_Fence', {
+          $.getJSON($SCRIPT_ROOT + '/change_Date', {
+            startDate : Global_date[0],
+            endDate : Global_date[1],
             lat : Global_centerlat,
             lng : Global_centerlng,
             fenceScale : Global_fenceScale
@@ -148,12 +162,21 @@
         // Set FenceScale to be the cookie
         
         $(function() {
+          var startd, endd;
+          if(getCookie('StartDate')){
+            startd = getCookie('StartDate');
+            endd = getCookie('EndDate');
+          }
+          else{
+            startd = new Date('2018.01.01').getTime();
+            endd = new Date().getTime();
+          }
         $( "#slider-range" ).slider({
               range: true,
               min: new Date('2018.01.01').getTime(),
-              max: new Date('2019.01.01').getTime(),
+              max: new Date().getTime(),
               step: 86400, // every setp is one day
-              values: [ new Date('2018.01.01').getTime(), new Date('2019.01.01').getTime()],
+              values: [ startd, endd],
               slide: function( event, ui ) {
                 $( "#amount" ).val( (new Date(ui.values[ 0 ]).toDateString() ) + " - " + (new Date(ui.values[ 1 ])).toDateString() );
                 
@@ -176,8 +199,14 @@
 
             });
             //initial presentation
-            $( "#amount" ).val( (new Date($( "#slider-range" ).slider( "values", 0 )).toDateString()) +
-              " - " + (new Date($( "#slider-range" ).slider( "values", 1 ))).toDateString());
+            if(getCookie('StartDate')){
+              $( "#amount" ).val(new Date(parseInt(getCookie('StartDate'))).toDateString() +
+                " - " + (new Date(parseInt(getCookie('EndDate'))).toDateString()));
+            }
+            else{
+              $( "#amount" ).val( (new Date($( "#slider-range" ).slider( "values", 0 )).toDateString()) +
+                " - " + (new Date($( "#slider-range" ).slider( "values", 1 ))).toDateString());
+            }
             
         });
 
@@ -199,6 +228,8 @@
                   Global_color = getCookie('FenceColor');
                 }
                 // flask send back data through JQuery
+                setCookie('StartDate',Global_date[0]);
+                setCookie('EndDate',Global_date[1]);
                 if(fenceInitialize == 0){
                   Global_spacelist = data[0];
                   Global_valuelist = data[1];
