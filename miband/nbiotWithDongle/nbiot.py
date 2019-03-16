@@ -2,10 +2,10 @@ import serial
 import time
 import codecs
 import os
+import random
 
 #mi band import libary
 import sys
-import os
 import signal
 import subprocess
 import threading
@@ -139,14 +139,13 @@ def getdataMI(band, data = []):
     data.append(band.get_steps()['steps'])
     print('Steps:', data[0])
 
-    band.start_raw_data_realtime(
-    heart_measure_callback=l,
-    heart_raw_callback=b,
-    accel_raw_callback=f)
-    print(data)
-    time.sleep(0.5)
+    while len(data) < 2:
+        band.start_raw_data_realtime(
+               heart_measure_callback=l,
+               heart_raw_callback=b,
+               accel_raw_callback=f)
+        time.sleep(5)
     return data
-        
 if __name__ == '__main__':
     ser=serial.Serial('/dev/ttyXRUSB1', 9600, timeout = 0.5)
 
@@ -159,12 +158,12 @@ if __name__ == '__main__':
     while True:
         f = open('/home/bigdata/Desktop/nbiotWithDongle/logs', 'a+')
         try:
-            ser.write(bytes("AT+NSOCR=DGRAM,17,5245,1\r\n", 'UTF-8'))
+            portNum = str(random.randint(6000,7000))
+            ser.write(bytes(("AT+NSOCR=DGRAM,17,"+ portNum + ",1\r\n"), 'UTF-8'))
             for _ in range(5):
                 response.append(ser.readline().decode("utf-8"))
                 print(response)
             f.write("   NSOCR:" + str(response))
-            
             if failFlag <= 0:
                 #It try more than 50 times reboot the ubuntu
                 f.write('Fail Connection/r/n')
@@ -172,10 +171,10 @@ if __name__ == '__main__':
                 #os.system('reboot')
                 #Prevent reboot fail
                 print('failFlag')
-                sys.exit(0)  
+                sys.exit(0)
             elif 'OK\r\n' in response:
                 #response == OK
-                #socketID = 1~6       
+                #socketID = 1~6
                 socketID = int(response[response.index('OK\r\n') - 2])
                 f.write('socketID=' + str(socketID) + '\r\n')
                 f.close()
@@ -193,8 +192,10 @@ if __name__ == '__main__':
     SendtoServer = 'AT+NSOST=' + str(socketID) + ',120.126.136.17,5687'
     nameNum = 5
     count = 0
+    band = 0
     while True:
         #must be 0 beacause the first package must ping
+        #if count % 20 == 0:#Ping server every 20 package
         start_time = time.time()
         ping(ser)
         time.sleep(5)
@@ -203,6 +204,7 @@ if __name__ == '__main__':
         f.write('Package'+ str(count) + ':')
         count += 1
         sendsuccessflag = 0
+        data = []
         try:
             messageHexAscii = ''
             sPort = initialize()#GPS initialize
@@ -228,20 +230,19 @@ if __name__ == '__main__':
                 print("--- %s seconds ---" % (waittime))
                 # time.sleep(waittime)
                 continue
-            data = []
             for dev in deviceslist:
                 try:
                     print(dev['device'])
                     if dev['device'] == target_address:
                         MAC = dev['device']
                         band = bandinit(MAC)
-                        data = getdataMI(band)
-
+                        data = getdataMI(band, data)
+                        print('bandinit')
                         if data == None:
                             print('No data')
                             break
                         #form Message
-                        message = str(round(lng,5))+ ':' +str(round(lat,5)) + ':' + str(nameNum) + ':' + message + ':' + str(count) + ':' + str(data)
+                        message = str(round(lng,5))+ ':' +str(round(lat,5)) + ':' + str(nameNum) + ':' + message + ':' + str(count) + ':' + str(data[0]) + ':' + str(data[1])
                         #count how many byte
                         messageByteNumber = str(len(message.encode('utf-8')))
                         #Turn to ascii code
@@ -291,12 +292,12 @@ if __name__ == '__main__':
                                     band.send_alert(ALERT_TYPES.MESSAGE)
                 print("--- %s seconds ---" % (60 - (time.time() - start_time)))
         else:
-            while 60 - 60 - (time.time() - start_time):
+            while 60 - (time.time() - start_time) > 0:
                 time.sleep(3)
                 print("--- %s seconds ---" % (60 - (time.time() - start_time)))
-                read = ser.readline().decode("utf-8")
-        if isinstance(band, int):
+        if not isinstance(band, int):
             band.disconnect()
-        f.close()
+    f.close()
     ser.close()
+
 
