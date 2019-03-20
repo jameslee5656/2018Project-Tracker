@@ -1,7 +1,7 @@
 # 2018Project-Tracker
 * Project status : continuing
-## Here Are some folder preview
 ---
+## Here Are some folder preview
 ### 1.MyTask:
   * Mainly my task, which is wriiten in python to calculate a person's hotspot
 ### 2.Tracker:
