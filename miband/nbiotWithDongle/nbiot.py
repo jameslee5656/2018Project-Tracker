@@ -3,6 +3,9 @@ import time
 import codecs
 import os
 import random
+import logging
+import logging.handlers
+import argparse
 
 #mi band import libary
 import sys
@@ -74,7 +77,7 @@ def getdata(port):
                     if flag ==0:
                         f.write('DATA ERROR!!/n') 
                         f.close()
-        
+
 # close the serial port
     port.close()
 
@@ -146,6 +149,39 @@ def getdataMI(band, data = []):
                accel_raw_callback=f)
         time.sleep(5)
     return data
+
+# Deafults
+LOG_FILENAME = '/tmp/nbiotservice.log'
+LOG_LEVEL = logging.INFO
+
+# Configure logging to log to a  file, making a new file at midnight and keeping the last 3 day's data
+# Give the logger a unique name
+logger = logging.getLogger(__name__)
+# Set the log level to LOG_LEVEL
+logger.setLevel(LOG_LEVEL)
+# Make a handler that writes to a file, making a new fiel at midnight and keeping 3 backups
+handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME, when='midnight', backupCount=3)
+# Format each log message like this
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+# Attach the formatter to the handler
+handler.setFormatter(formatter)
+# Attach the handler to ther logger
+logger.addHandler(handler)
+
+# Make a class we can use to capture stdout and sterr in the log
+class Mylogger(object):
+    def __init__(self, logger, level):
+        # Needs a logger and logger level
+        self.logger = logger
+        self.level = level
+    def write(self, message):
+        # Only log if there is a message (not just a new line)
+        if message.rstrip() != '':
+            self.logger.log(self, message.rstrip())
+# Replace stdout woth logging to file at INFO level
+sys.stdout = Mylogger(logger, logging.INFO)
+# Replace stderr with logging to file at ERROR level
+sys.stderr = Mylogger(logger, logging.ERROR)
 if __name__ == '__main__':
     ser=serial.Serial('/dev/ttyXRUSB1', 9600, timeout = 0.5)
 
@@ -154,39 +190,39 @@ if __name__ == '__main__':
     start_time = 0
     target_name = 'MI Band 2'
     target_address = 'c7:28:2d:cc:4f:c9'
+    logger.info('this is a test from logging')
     #The first stage Open a socket and read a socketID
     while True:
-        f = open('/home/bigdata/Desktop/nbiotWithDongle/logs', 'a+')
+        # f = open('/home/bigdata/Desktop/nbiotWithDongle/logs', 'a+')
         try:
             portNum = str(random.randint(6000,7000))
             ser.write(bytes(("AT+NSOCR=DGRAM,17,"+ portNum + ",1\r\n"), 'UTF-8'))
             for _ in range(5):
                 response.append(ser.readline().decode("utf-8"))
-                print(response)
-            f.write("   NSOCR:" + str(response))
+                logger.info(response)
+                # print(response)
+            logger.info("NSOCR:" + str(response))
             if failFlag <= 0:
                 #It try more than 50 times reboot the ubuntu
-                f.write('Fail Connection/r/n')
-                f.close()
+                logger.info('Fail Connection/r/n')
                 #os.system('reboot')
                 #Prevent reboot fail
-                print('failFlag')
+                logger.info('failFlag')
                 sys.exit(0)
             elif 'OK\r\n' in response:
                 #response == OK
                 #socketID = 1~6
                 socketID = int(response[response.index('OK\r\n') - 2])
-                f.write('socketID=' + str(socketID) + '\r\n')
-                f.close()
+                logger.info('socketID=' + str(socketID) + '\r\n')
+                #f.close()
                 break
             else:
                 failFlag -= 1
-                f.write('Still trying\r\n')
-                f.close()
+                logger.info('Still trying\r\n')
                 continue
 
         except Exception as e:
-            f.write('the last part in NSCOR: ' + str(e))
+            logger.info('the last part in NSCOR: ' + str(e))
 
     #Basic sentence for sending message
     SendtoServer = 'AT+NSOST=' + str(socketID) + ',120.126.136.17,5687'
@@ -233,6 +269,7 @@ if __name__ == '__main__':
             for dev in deviceslist:
                 try:
                     print(dev['device'])
+                    f.write(dev['device'])
                     if dev['device'] == target_address:
                         MAC = dev['device']
                         band = bandinit(MAC)
