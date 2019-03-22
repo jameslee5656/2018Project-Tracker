@@ -20,16 +20,17 @@ DAEMON_OPTS=""
 
 # This next line determines what user the script runs as.
 # Root generally not recommended but necessary if you are using the Raspberry Pi GPIO from Python.
-DAEMON_USER=root
+DAEMON_USER=bigdata
 
 # The process ID of the script when it runs is stored here:
 PIDFILE=/var/run/$DAEMON_NAME.pid
 
 . /lib/lsb/init-functions
-
-sleep 35s
 do_start () {
     log_daemon_msg "Starting system $DAEMON_NAME daemon"
+    # sudo rmmod cdc-acm
+    # sudo insmod /home/bigdata/Documents/startup/xr_usb_serial_common.ko
+    # sleep 15s
     start-stop-daemon --start --background --pidfile $PIDFILE --make-pidfile --user $DAEMON_USER --chuid $DAEMON_USER --startas $DAEMON -- $DAEMON_OPTS
     log_end_msg $?
 }

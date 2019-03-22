@@ -19,17 +19,51 @@ from base import MiBand2
 from constants import ALERT_TYPES
 from bluepy.btle import Scanner, DefaultDelegate
 
+# Deafults
+LOG_FILENAME = '/tmp/nbiotservice.log'
+LOG_LEVEL = logging.INFO
+
+# Configure logging to log to a  file, making a new file at midnight and keeping the last 3 day's data
+# Give the logger a unique name
+logger = logging.getLogger(__name__)
+# Set the log level to LOG_LEVEL
+logger.setLevel(LOG_LEVEL)
+# Make a handler that writes to a file, making a new fiel at midnight and keeping 3 backups
+handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME, when='midnight', backupCount=3)
+# Format each log message like this
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+# Attach the formatter to the handler
+handler.setFormatter(formatter)
+# Attach the handler to ther logger
+logger.addHandler(handler)
+
+# Make a class we can use to capture stdout and sterr in the log
+class Mylogger(object):
+    def __init__(self, logger, level):
+        # Needs a logger and logger level
+        self.logger = logger
+        self.level = level
+    def write(self, message):
+        # Only log if there is a message (not just a new line)
+        if message.rstrip() != '':
+            self.logger.log(self.level, message.rstrip())
+# Replace stdout woth logging to file at INFO level
+sys.stdout = Mylogger(logger, logging.INFO)
+# Replace stderr with logging to file at ERROR level
+# sys.stderr = Mylogger(logger, logging.ERROR)
+
 
 #mi band
-
 class ScanDelefate(DefaultDelegate):
     def __init__(self):
         DefaultDelegate.__init__(self)
     def handleDiscovery(self, dev, isNewDev, isNewData):
         if isNewDev:
-            print('Discovered device', dev.addr)
+            pass
+            # logger.info('Discovered device', dev.addr)
         elif isNewData:
-            print('Received new data from', dev.addr)
+            pass
+            # logger.info('Received new data from', dev.addr)
 
 # GPS code 
 def fixlat(data):
@@ -59,24 +93,21 @@ def getdata(port):
     if port.isOpen():
 # read 16 line
         flag=20
-        f = open('/home/bigdata/Desktop/nbiotWithDongle/logs', 'a+')
         while True:
             line=str(port.readline())
-            print(line)
+            # logger.info(line)
             if line.find('RMC')>0:
                 if line.find(',A,')>0:
-                    print(line)
+                    logger.info(line)
                     lat=line[line.index('A')+1:line.index('N',10)].strip(',')
                     lng=line[line.index('N',10)+1:line.index('E')].strip(',')
                     flng = fixlng(lng)
                     flat = fixlat(lat)
-                    f.close()
                     break
                 else:
                     flag -= 1
                     if flag ==0:
-                        f.write('DATA ERROR!!/n') 
-                        f.close()
+                        logger.info('DATA ERROR!!/n') 
 
 # close the serial port
     port.close()
@@ -90,13 +121,10 @@ def getdata(port):
 def ping(ser):
     while True:
         ser.write(bytes("AT+NPING=120.126.136.17\r\n", 'UTF-8'))
-        f = open('/home/bigdata/Desktop/nbiotWithDongle/logs', 'a+')#open logs
         response = []
         for _ in range(5):
             response.append(ser.readline().decode("utf-8"))
-            print(response)
-        f.write("    PING:" + str(response))
-        f.close()
+        # logger.info('PING:'  str(response))
         if 'OK\r\n' in response:
             return
 
@@ -106,7 +134,7 @@ def bandinit(MAC='c7:28:2d:cc:4f:c9'):
     band.setSecurityLevel(level="medium")
     if not band.authenticate():
         band.initialize()
-        print("Init OK")
+        logger.info("Init OK")
     return band
 
 # this function take the current heartrate out of miband
@@ -120,7 +148,7 @@ def getdataMI(band, data = []):
         print('Raw accel heart:', x)                
 
     # band.set_heart_monitor_sleep_support(enabled=False)
-    # print('Print previews recorded data')
+    # print('Print previewsd recorded data')
     # band._auth_previews_data_notif(True)
     # preview_time = datetime.strptime("12.03.2018 01:01", "%d.%m.%Y %H:%M")
     # band.start_get_previews_data(preview_time)
@@ -140,7 +168,8 @@ def getdataMI(band, data = []):
 
     # print('Time:', band.get_current_time())
     data.append(band.get_steps()['steps'])
-    print('Steps:', data[0])
+    if data[0]:
+        logger.info('Steps:', data[0])
 
     while len(data) < 2:
         band.start_raw_data_realtime(
@@ -150,38 +179,6 @@ def getdataMI(band, data = []):
         time.sleep(5)
     return data
 
-# Deafults
-LOG_FILENAME = '/tmp/nbiotservice.log'
-LOG_LEVEL = logging.INFO
-
-# Configure logging to log to a  file, making a new file at midnight and keeping the last 3 day's data
-# Give the logger a unique name
-logger = logging.getLogger(__name__)
-# Set the log level to LOG_LEVEL
-logger.setLevel(LOG_LEVEL)
-# Make a handler that writes to a file, making a new fiel at midnight and keeping 3 backups
-handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME, when='midnight', backupCount=3)
-# Format each log message like this
-formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
-# Attach the formatter to the handler
-handler.setFormatter(formatter)
-# Attach the handler to ther logger
-logger.addHandler(handler)
-
-# Make a class we can use to capture stdout and sterr in the log
-class Mylogger(object):
-    def __init__(self, logger, level):
-        # Needs a logger and logger level
-        self.logger = logger
-        self.level = level
-    def write(self, message):
-        # Only log if there is a message (not just a new line)
-        if message.rstrip() != '':
-            self.logger.log(self, message.rstrip())
-# Replace stdout woth logging to file at INFO level
-sys.stdout = Mylogger(logger, logging.INFO)
-# Replace stderr with logging to file at ERROR level
-sys.stderr = Mylogger(logger, logging.ERROR)
 if __name__ == '__main__':
     ser=serial.Serial('/dev/ttyXRUSB1', 9600, timeout = 0.5)
 
@@ -190,18 +187,14 @@ if __name__ == '__main__':
     start_time = 0
     target_name = 'MI Band 2'
     target_address = 'c7:28:2d:cc:4f:c9'
-    logger.info('this is a test from logging')
     #The first stage Open a socket and read a socketID
     while True:
-        # f = open('/home/bigdata/Desktop/nbiotWithDongle/logs', 'a+')
         try:
             portNum = str(random.randint(6000,7000))
             ser.write(bytes(("AT+NSOCR=DGRAM,17,"+ portNum + ",1\r\n"), 'UTF-8'))
             for _ in range(5):
                 response.append(ser.readline().decode("utf-8"))
-                logger.info(response)
-                # print(response)
-            logger.info("NSOCR:" + str(response))
+            # logger.info("NSOCR:" + str(response))
             if failFlag <= 0:
                 #It try more than 50 times reboot the ubuntu
                 logger.info('Fail Connection/r/n')
@@ -214,7 +207,6 @@ if __name__ == '__main__':
                 #socketID = 1~6
                 socketID = int(response[response.index('OK\r\n') - 2])
                 logger.info('socketID=' + str(socketID) + '\r\n')
-                #f.close()
                 break
             else:
                 failFlag -= 1
@@ -224,7 +216,7 @@ if __name__ == '__main__':
         except Exception as e:
             logger.info('the last part in NSCOR: ' + str(e))
 
-    #Basic sentence for sending message
+    # Basic sentence for sending message
     SendtoServer = 'AT+NSOST=' + str(socketID) + ',120.126.136.17,5687'
     nameNum = 5
     count = 0
@@ -235,9 +227,7 @@ if __name__ == '__main__':
         start_time = time.time()
         ping(ser)
         time.sleep(5)
-        f = open('/home/bigdata/Desktop/nbiotWithDongle/logs', 'a+')#open logs
-        print('Package' , str(count))
-        f.write('Package'+ str(count) + ':')
+        logger.info('Package'+ str(count) + ':')
         count += 1
         sendsuccessflag = 0
         data = []
@@ -263,20 +253,19 @@ if __name__ == '__main__':
 
             if deviceslist == None:
                 waittime = 60 - (time.time() - start_time)
-                print("--- %s seconds ---" % (waittime))
+                logger.info("--- %s seconds ---" % (waittime))
                 # time.sleep(waittime)
                 continue
             for dev in deviceslist:
                 try:
-                    print(dev['device'])
-                    f.write(dev['device'])
+                    # logger.info(dev['device'])
                     if dev['device'] == target_address:
                         MAC = dev['device']
                         band = bandinit(MAC)
                         data = getdataMI(band, data)
-                        print('bandinit')
+                        logger.info('bandinit')
                         if data == None:
-                            print('No data')
+                            logger.info('No data')
                             break
                         #form Message
                         message = str(round(lng,5))+ ':' +str(round(lat,5)) + ':' + str(nameNum) + ':' + message + ':' + str(count) + ':' + str(data[0]) + ':' + str(data[1])
@@ -296,45 +285,41 @@ if __name__ == '__main__':
                         #     read = ser.readline().decode("utf-8")
                         #     if read:
                         #         response.append(read)
-                        #write message     
-                        sendsuccessflag = 1  
-                        print('successfull')
-                        #f.write(response.append('successfull\r\n'))
+                        #write message
+                        sendsuccessflag = 1
+                        logger.info('successfull')
                 except Exception as e:
-                    print('there is a problem here' ,str(e))
+                    # logger.info('there is a problem here' ,str(e))
                     pass
-            
-        except Exception as e: 
-            print('Last part Sending: ' + str(e) + '\r\n')
-            #f.write('Last part Sending: ' + str(e) + '\r\n')
+
+        except Exception as e:
+            # logger.warning('Last part Sending: ' + str(e) + '\r\n')
             pass
         if sendsuccessflag == 1:
              while 60 - (time.time() - start_time) > 0:
                 read = ser.readline().decode("utf-8")
-                print(read)
+                logger.info(read)
                 if read.find('+NSONMI') != -1:
-                    print('into NSONMI')
                     start = read.find('+NSONMI:')
-                    print("AT+NSORF="+read[start:])
+                    logger.info("AT+NSORF="+read[start:])
                     ser.write(bytes("AT+NSORF="+read[start+8:], 'UTF-8'))
                     for _ in range(5):
                         read = ser.readline().decode("utf-8")
                         if read:
                             read_start = read.find('120.126.136.17,5687,')
                             if read_start != -1:
-                                print(read)
+                                # logger.info(read)
                                 returnMessage = read[read_start + 20:read.find(',0')]
-                                print(returnMessage)
+                                logger.info(returnMessage)
                                 if returnMessage == '1,33':
                                     band.send_alert(ALERT_TYPES.MESSAGE)
-                print("--- %s seconds ---" % (60 - (time.time() - start_time)))
+                logger.info("--- %s seconds ---" % (60 - (time.time() - start_time)))
         else:
             while 60 - (time.time() - start_time) > 0:
                 time.sleep(3)
-                print("--- %s seconds ---" % (60 - (time.time() - start_time)))
+                logger.info("--- %s seconds ---" % (60 - (time.time() - start_time)))
         if not isinstance(band, int):
             band.disconnect()
-    f.close()
     ser.close()
 
 
