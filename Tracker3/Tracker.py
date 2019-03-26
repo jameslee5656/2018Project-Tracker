@@ -163,7 +163,7 @@ def history():
         # print(userlist, file=sys.stderr)
         '''產生電子圍籬'''
         elFence = electricFence()
-        elFence.pullData(userlist)
+        elFence.pullData(user = userlist[0],userlist = userlist)
         elFence.onlySanxia()
         elFence.removeOutlier()
         if FenceScale == 0:
@@ -234,7 +234,7 @@ def history_display():
         # print(userlist, file=sys.stderr)
         '''產生電子圍籬'''
         elFence = electricFence()
-        elFence.pullData(userlist)
+        elFence.pullData(user = userlist[0],userlist = userlist)
         elFence.onlySanxia()
         elFence.removeOutlier()
         if FenceScale == 0:
@@ -340,7 +340,7 @@ def master_history_display():
         # print(userlist, file=sys.stderr)
         '''產生電子圍籬'''
         elFence = electricFence()
-        elFence.pullData(userlist)
+        elFence.pullData(user = userlist[0],userlist = userlist)
         elFence.onlySanxia()
         elFence.removeOutlier()
         if FenceScale == 0:
@@ -460,10 +460,10 @@ def change_Date():
     #FenceScale = mongo.db.Select_People.find({'username': 'manager'})[0]['FenceScale']
     FenceScale = int(fenceScale)
     elFence = electricFence()
-    elFence.pullData(userlist,startDate,endDate)
+    elFence.pullData(userlist[0],userlist,startDate,endDate)
     elFence.onlySanxia()
     elFence.removeOutlier()
-    spacelist,valuelist = elFence.squareBounds(FenceScale,baseLocation)
+    spacelist,valuelist = elFence.squareBounds(FenceScale)
     '''key = 'AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw'#api key
     name = 0;
     for i in valuelist[:10]:

@@ -8,6 +8,7 @@ import matplotlib.path as mplPath
 import numpy as np
 import urllib.request, json
 from datetime import datetime
+import operator
 
 class electricFence():
     def __init__(self):
@@ -16,27 +17,33 @@ class electricFence():
         self.location = []
         self.frequency = {}
         self.chosenPoint = []
-        self.user = []
+        self.user = ''
+        self.userlist = []
+        self.jsonData = {}
         
-    def pullData(self, user, minDate = 1514736000000, maxDate = 1546272000000): #pull latitude and longitude
-        
-        for x in user:
-            self.user = user
-
+    def pullData(self, user, userlist, minDate = 1514736000000, maxDate = 1546272000000): #pull latitude and longitude
+        self.user = user
+        self.userlist = userlist
+        for x in userlist:
             client = MongoClient('120.126.136.17',27017)
             db = client['Tracker']
             collection = db[x]
             cursor = collection.find({})
-
             jsonData = [d for d in cursor]
+            self.jsonData[x] = jsonData
             for y in jsonData:
-                dateStr = str(y['year']) + ':' + str(y['month']) + ':' + str(y['day']) + ':' \
-                         + str(y['hour']) + ':' + str(y['minute']) + ':' + str(y['second'])
-                datetime_object = datetime.strptime(dateStr, '%Y:%m:%d:%H:%M:%S')
-                date_float = datetime_object.timestamp() * 1000
-                if((date_float >= minDate) and (date_float <= maxDate)):
-                    self.latitude.append(float(y['latitude']))
-                    self.longitude.append(float(y['longitude']))
+                # dateStr = str(y['year']) + ':' + str(y['month']) + ':' + str(y['day']) + ':' \
+                #          + str(y['hour']) + ':' + str(y['minute']) + ':' + str(y['second'])
+                # datetime_object = datetime.strptime(dateStr, '%Y:%m:%d:%H:%M:%S')
+                # date_float = datetime_object.timestamp() * 1000
+                timestamp = int(y['timestamp']) * 1000
+                if((timestamp >= minDate) and (timestamp <= maxDate)):
+                    if y['latitude'] != '' and y['longitude'] != '':
+                        self.latitude.append(float(y['latitude']))
+                        self.longitude.append(float(y['longitude']))
+                    else:
+                        self.latitude.append(0)
+                        self.longitude.append(0)
             
     def onlySanxia(self):
 #         Too slow
@@ -96,7 +103,10 @@ class electricFence():
         return self.chosenPoint
     
     #make the bounds
-    def squareBounds(self,boundScale = 1,baseLocation = [24.938590,121.360761]):
+    def squareBounds(self,boundScale = 1):#baseLocation = [24.938590,121.360761]
+        #checking boundScale
+        lattestData = max(self.jsonData[self.user], key=lambda x:x['timestamp'])
+        baseLocation = [lattestData['latitude'],lattestData['longitude']]
         #checking boundScale
         if type(boundScale) != 'int':
             boundScale = int(boundScale)
@@ -218,4 +228,4 @@ class electricFence():
 #             tempt.append(sortNum)
 #             sortNum += 1
             newlist.append(tempt)
-        return spacelist,newlist 
+        return spacelist,newlist,baseLocation
