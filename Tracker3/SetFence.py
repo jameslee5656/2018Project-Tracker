@@ -2,7 +2,7 @@ import math
 from pymongo import MongoClient
 from xml.etree import ElementTree
 import pprint
-import json
+import json, time
 import matplotlib.pyplot as plt
 import matplotlib.path as mplPath
 import numpy as np
@@ -21,7 +21,7 @@ class electricFence():
         self.userlist = []
         self.jsonData = {}
         
-    def pullData(self, user, userlist, minDate = 1514736000000, maxDate = 1546272000000): #pull latitude and longitude
+    def pullData(self, user, userlist, minDate = 1514736000000, maxDate = time.time() * 1000): #pull latitude and longitude
         self.user = user
         self.userlist = userlist
         for x in userlist:
@@ -37,6 +37,7 @@ class electricFence():
                 # datetime_object = datetime.strptime(dateStr, '%Y:%m:%d:%H:%M:%S')
                 # date_float = datetime_object.timestamp() * 1000
                 timestamp = int(y['timestamp']) * 1000
+                # print(timestamp)
                 if((timestamp >= minDate) and (timestamp <= maxDate)):
                     if y['latitude'] != '' and y['longitude'] != '':
                         self.latitude.append(float(y['latitude']))
@@ -44,7 +45,6 @@ class electricFence():
                     else:
                         self.latitude.append(0)
                         self.longitude.append(0)
-            
     def onlySanxia(self):
 #         Too slow
         with open('geography.gml', encoding = 'utf8') as file:
@@ -64,7 +64,6 @@ class electricFence():
                 boardData.append([x[0],x[1]])
             sacrifice += 1
         borderPath = mplPath.Path(boardData)
-        
         for x in range(len(self.latitude)):
             if borderPath.contains_points(np.array([[self.longitude[x], self.latitude[x]]])):       
                 self.location.append([round(self.latitude[x],4), round(self.longitude[x],4)])
@@ -115,8 +114,9 @@ class electricFence():
         elif boundScale > 10:
             boundScale = 10
             
-        downlat = baseLocation[0]#24.938590 
-        leftlong = baseLocation[1]#121.360761
+        downlat = float(baseLocation[0])#24.938590 
+        leftlong = float(baseLocation[1])#121.360761
+        print(float(baseLocation[0]),float(baseLocation[1]) )
         toplat = 24.94884
         rightlong = 121.373937
 
@@ -126,7 +126,7 @@ class electricFence():
         #make out a dic that is the smallest boundScale = 1
         for i in range(int(round(0.01,4)*10000)):
             for j in range(int(round(0.01,4)*10000)):
-                squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])]=0
+                squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])] = 0
 
         for x in temptlist:
             if tuple(x) in squarefreq:
@@ -229,3 +229,12 @@ class electricFence():
 #             sortNum += 1
             newlist.append(tempt)
         return spacelist,newlist,baseLocation
+
+
+user = 'leo'
+userlist = ['leo','james']
+elFence = electricFence()
+elFence.pullData(user,userlist)
+elFence.onlySanxia()
+elFence.removeOutlier()
+spacelist,valuelist,baseLocation = elFence.squareBounds()
