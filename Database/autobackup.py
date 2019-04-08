@@ -11,11 +11,11 @@ KEYPATH = '/home/james/.ssh/id_rsa'
 ssh = paramiko.SSHClient()
 key = paramiko.RSAKey.from_private_key_file(KEYPATH)
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect(hostname=REMOTEHOST, port=22,username=USERNAME, pkey=key)
 now = datetime.datetime.now()
 firstflag = True
 while True: 
 	if firstflag or int((datetime.datetime.now() - now).total_seconds()) > 60*60*12:
+		ssh.connect(hostname=REMOTEHOST, port=22,username=USERNAME, pkey=key)
 		now = datetime.datetime.now()
 		filename = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") 
 		#code, printout
@@ -26,5 +26,6 @@ while True:
 		os.system("scp -r bigdata@120.126.136.17:/home/bigdata/dump/" + filename + " .")
 		os.system("mongorestore -h 127.0.0.1 -d Tracker " + filename + "/Tracker --drop")
 		firstflag = False
+		ssh.close()
 	else:
 		time.sleep(60*61)
