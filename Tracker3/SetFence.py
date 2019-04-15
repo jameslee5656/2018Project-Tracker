@@ -118,7 +118,7 @@ class electricFence():
             
         downlat = float(baseLocation[0]) - 0.01#24.938590 
         leftlong = float(baseLocation[1]) - 0.01#121.360761
-        print(float(baseLocation[0]),float(baseLocation[1]) )
+        # print(float(baseLocation[0]),float(baseLocation[1]) )
         toplat = 24.94884
         rightlong = 121.373937
 
@@ -126,10 +126,10 @@ class electricFence():
 
         squarefreq = {}
         #make out a dic that is the smallest boundScale = 1
-        for i in range(int(round(0.01,4)*10000)):
-            for j in range(int(round(0.01,4)*10000)):
+        for i in range(int(round(0.02,4)*10000)):
+            for j in range(int(round(0.02,4)*10000)):
                 squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])] = 0
-        print(squarefreq)
+        # print(squarefreq)
         # print(temptlist)
         for x in temptlist:
             # print(tuple(x), tuple(x) in squarefreq)
@@ -240,3 +240,15 @@ class electricFence():
 #             sortNum += 1
             newlist.append(tempt)
         return spacelist,newlist,baseLocation
+
+
+user = 'james' 
+userlist = ['james'] 
+elFence = electricFence() 
+elFence.pullData(user,userlist) 
+elFence.onlySanxia() 
+elFence.removeOutlier() 
+spacelist,valuelist,base = elFence.squareBounds() 
+# print(spacelist) 
+print(valuelist) 
+# print(base)
