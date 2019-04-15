@@ -45,6 +45,7 @@ class electricFence():
                     else:
                         self.latitude.append(0)
                         self.longitude.append(0)
+
     def onlySanxia(self):
 #         Too slow
         with open('geography.gml', encoding = 'utf8') as file:
@@ -106,6 +107,7 @@ class electricFence():
         #checking boundScale
         lattestData = max(self.jsonData[self.user], key=lambda x:x['timestamp'])
         baseLocation = [lattestData['latitude'],lattestData['longitude']]
+        # print(baseLocation)
         #checking boundScale
         if type(boundScale) != 'int':
             boundScale = int(boundScale)
@@ -114,8 +116,8 @@ class electricFence():
         elif boundScale > 10:
             boundScale = 10
             
-        downlat = float(baseLocation[0])#24.938590 
-        leftlong = float(baseLocation[1])#121.360761
+        downlat = float(baseLocation[0]) - 0.01#24.938590 
+        leftlong = float(baseLocation[1]) - 0.01#121.360761
         print(float(baseLocation[0]),float(baseLocation[1]) )
         toplat = 24.94884
         rightlong = 121.373937
@@ -127,8 +129,10 @@ class electricFence():
         for i in range(int(round(0.01,4)*10000)):
             for j in range(int(round(0.01,4)*10000)):
                 squarefreq[tuple([round(downlat + i/10000 ,4), round(leftlong + j/10000,4)])] = 0
-
+        print(squarefreq)
+        # print(temptlist)
         for x in temptlist:
+            # print(tuple(x), tuple(x) in squarefreq)
             if tuple(x) in squarefreq:
                 #the way i think: use mod to divide into two group just like roundup
                 if round((x[0] - downlat)*10000,0) % boundScale != 0:
@@ -149,12 +153,15 @@ class electricFence():
 
         #divide into different percentage
         boundlist = []
+        # print(squarefreq)
         squarefreqMax = max(squarefreq.values())
+        # print(squarefreqMax)
         if squarefreqMax != 0:
             squarefreqMax = math.log10(max(squarefreq.values()))
         for k,values in squarefreq.items():
             key = list(k)
             org_values = values
+            # print(org_values)
             if round((key[0] - downlat)*10000,0) % boundScale == 0:
                 if round((key[1] - leftlong)*10000,0) % boundScale == 0:
                     lt = [round(key[0] + 0.00005*boundScale,5), round(key[1] - 0.00005*boundScale,5)]
@@ -217,24 +224,19 @@ class electricFence():
             spacelist.append(temptlist)
             
         valuelist=[]
+        # print(boundlist[0])
         for x in boundlist:
+            # print(x[4],x[5])
             if x[4] != 0:
+                # print(x[4])
                 valuelist.append(x)
         valuelist = sorted(valuelist,key=lambda x: x[5],reverse=True)
 #         sortNum = 1
         newlist = []
+        # print(valuelist)
         for x in valuelist:
             tempt = x[0:6]
 #             tempt.append(sortNum)
 #             sortNum += 1
             newlist.append(tempt)
         return spacelist,newlist,baseLocation
-
-
-user = 'leo'
-userlist = ['leo','james']
-elFence = electricFence()
-elFence.pullData(user,userlist)
-elFence.onlySanxia()
-elFence.removeOutlier()
-spacelist,valuelist,baseLocation = elFence.squareBounds()
