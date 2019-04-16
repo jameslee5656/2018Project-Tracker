@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Main2Activity">
+
+    <TextView
+        android:id="@+id/watch_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="我的手環"
+        android:textSize="22dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginLeft="25dp" />
+
+    <ImageView
+        android:id="@+id/watch_img"
+        android:layout_width="135dp"
+        android:layout_height="112dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_below="@+id/watch_title"
+        android:layout_marginTop="60dp"
+        android:src="@drawable/golifecarex" />
+
+    <TextView
+        android:id="@+id/watch_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="手環名稱"
+        android:textSize="18dp"
+        android:layout_below="@+id/watch_title"
+        android:layout_toRightOf="@+id/watch_img"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"/>
+
+    <TextView
+        android:id="@+id/watchname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="  --  "
+        android:textSize="18dp"
+        android:layout_below="@+id/watch_title"
+        android:layout_toRightOf="@+id/watch_name"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"/>
+
+    <TextView
+        android:id="@+id/watch_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ID"
+        android:textSize="18dp"
+        android:layout_below="@+id/watch_name"
+        android:layout_toRightOf="@+id/watch_img"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"/>
+
+    <TextView
+        android:id="@+id/watchid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="  --  "
+        android:textSize="18dp"
+        android:layout_below="@+id/watch_name"
+        android:layout_toRightOf="@+id/watch_id"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"/>
+
+    <TextView
+        android:id="@+id/watch_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="連線狀況"
+        android:textSize="18dp"
+        android:layout_below="@+id/watch_id"
+        android:layout_toRightOf="@+id/watch_img"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"/>
+
+    <TextView
+        android:id="@+id/watchstatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="  --  "
+        android:textSize="16dp"
+        android:layout_below="@+id/watch_id"
+        android:layout_toRightOf="@+id/watch_status"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp" />
+
+    <!--android:onClick="cancel"-->
+    <ImageButton
+        android:id="@+id/stop_service"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/watch_status"
+        android:layout_below="@+id/watchname"
+        android:layout_marginLeft="90dp"
+        android:background="@drawable/button_style"
+        android:src="@drawable/baseline_delete_black_24dp"
+        />
+
+    <ImageView
+        android:id="@+id/line1"
+         android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="#D3D3D3"
+        android:layout_below="@+id/watch_img"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/info_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="健康資訊"
+        android:textSize="22dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginLeft="25dp"
+        android:layout_below="@+id/line1"/>
+
+    <TextView
+        android:id="@+id/hr_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="心律"
+        android:textSize="24dp"
+        android:layout_marginLeft="35dp"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="20dp"
+        android:drawableLeft="@drawable/baseline_favorite_border_black_18dp"
+        android:layout_below="@+id/info_title"/>
+
+    <TextView
+        android:id="@+id/hr_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/info_title"
+        android:layout_toRightOf="@+id/hr_title"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="15dp"
+        android:text="  --  "
+        android:textSize="24dp"/>
+
+    <TextView
+        android:id="@+id/o2_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="血氧"
+        android:textSize="24dp"
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="20dp"
+        android:drawablePadding="5dp"
+        android:drawableLeft="@drawable/baseline_opacity_black_18dp"
+        android:layout_below="@+id/hr_title"/>
+
+    <TextView
+        android:id="@+id/o2_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/hr_title"
+        android:layout_toRightOf="@+id/hr_title"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="15dp"
+        android:text="  --  "
+        android:textSize="24dp"/>
+
+    <TextView
+        android:id="@+id/step_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="步數"
+        android:textSize="24dp"
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="20dp"
+        android:drawablePadding="5dp"
+        android:drawableLeft="@drawable/baseline_directions_walk_black_18dp"
+        android:layout_below="@+id/o2_title"/>
+
+    <TextView
+        android:id="@+id/step_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/o2_title"
+        android:layout_toRightOf="@+id/hr_title"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="15dp"
+        android:text="  --  "
+        android:textSize="24dp"/>
+
+    <TextView
+        android:id="@+id/gps_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="位置"
+        android:textSize="24dp"
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="20dp"
+        android:drawablePadding="5dp"
+        android:drawableLeft="@drawable/baseline_location_on_black_18dp"
+        android:layout_below="@+id/step_title"/>
+
+    <TextView
+        android:id="@+id/gps_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/step_title"
+        android:layout_toRightOf="@+id/hr_title"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="15dp"
+        android:text="  --  "
+        android:textSize="24dp"/>
+
+
+    <ImageButton
+        android:id="@+id/start_service"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginRight="33dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/button_style"
+
+        android:src="@drawable/baseline_add_circle_outline_black_24dp" />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/watchid"
+        android:layout_alignTop="@+id/start_service"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="32dp"
+        android:layout_toLeftOf="@+id/start_service"
+        android:text="快速連線"
+        />
+
+</RelativeLayout>

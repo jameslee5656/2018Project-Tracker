@@ -242,13 +242,13 @@ class electricFence():
         return spacelist,newlist,baseLocation
 
 
-user = 'james' 
-userlist = ['james'] 
-elFence = electricFence() 
-elFence.pullData(user,userlist) 
-elFence.onlySanxia() 
-elFence.removeOutlier() 
-spacelist,valuelist,base = elFence.squareBounds() 
-# print(spacelist) 
-print(valuelist) 
-# print(base)
+# user = 'james' 
+# userlist = ['james'] 
+# elFence = electricFence() 
+# elFence.pullData(user,userlist) 
+# elFence.onlySanxia() 
+# elFence.removeOutlier() 
+# spacelist,valuelist,base = elFence.squareBounds() 
+# # print(spacelist) 
+# print(valuelist)
+# # print(base)
