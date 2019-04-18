@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -26,6 +27,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -114,10 +116,10 @@ public class BackGroundService extends Service {
                         sendBroadcast(i);
 
                         if(!client.isConnected()){
-                            Log.d("GPS", "MQTT Connect fail in Thread");
                             init();
                         }
-                        pub(hr,o2,step);
+                        pub(hr, o2, step);
+
                     }else if(!_goFITSdk.isBLEConnect()&&isScan){
                         //斷線
                         Calendar calendar = Calendar.getInstance();
@@ -126,10 +128,15 @@ public class BackGroundService extends Service {
                         if(disconnectTime==0){
                             disconnectTime=nowTime;
                         }
-                        //斷線10分內繼續傳
+
+                        //斷線10分內繼續傳600000
                         if((nowTime-disconnectTime)<600000) {
                             Log.d("GPS", "Start");
-                            pub("0","0","0");
+
+                            if(!client.isConnected()){
+                                init();
+                            }
+                            pub("","","");
 
                             SharedPreferences setting_watch = getSharedPreferences("watch_info", MODE_PRIVATE);
                             String macAddress = setting_watch.getString("macAddress", "");
@@ -158,6 +165,22 @@ public class BackGroundService extends Service {
                             Log.d("GPS", "BLE connect fail in Thread");
                         }else{
                             //超過10分鐘，停止服務
+                            Log.d("GPS", "Destory service");
+                            _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,"連線逾時","end");
+                            _goFITSdk.doDisconnectDevice();
+
+                            Notification notification =new Notification.Builder(BackGroundService.this)
+                                    .setContentTitle("GO_LiFE Service")
+                                    .setContentText("連線逾時")
+                                    .setSmallIcon(R.drawable.ic_android)
+                                    .setDefaults(Notification.DEFAULT_ALL)
+                                    .build();
+                            NotificationManager manager = (NotificationManager)
+                                    getSystemService(Context.NOTIFICATION_SERVICE);
+                            manager.notify((int)nowTime,notification);
+
+                            Intent i =new Intent(getApplicationContext(),BackGroundService.class);
+                            stopService(i);
 
                         }
                     }
@@ -189,14 +212,16 @@ public class BackGroundService extends Service {
 
 
         String message = userName+":"+lastY+":"+lastX+":"+temHR+":"+temO2+":"+temStep+":"
-                +year+":"+month+":"+day+":" +hour+":"+minute+":"+second;          //訊息讓使用者輸入
+                +year+":"+month+":"+day+":" +hour+":"+minute+":"+second;
+        Log.d("GPS", "message: "+message);
         try {
             Log.d("GPS", "Connect?  "+client.isConnected());
-            client.publish(myTopic, message.getBytes(),0,false);
+
+            client.publish(myTopic, message.getBytes(), 0, false);
+
             Log.d("GPS", "pub ");
         } catch (Exception e) {
-            Log.d("GPS", "MQTTException in publish");
-            e.printStackTrace();
+            Log.d("GPS", "MQTTException in publish"+    e.getMessage());
         }
     }
     public void sub(){
@@ -441,7 +466,7 @@ public class BackGroundService extends Service {
         PendingIntent pendingIntent=PendingIntent.getActivity(this,
                 0,notificationIntent,0);
         Notification notification =new NotificationCompat.Builder(this,CHANNEL_ID)
-                .setContentTitle("GPS Service")
+                .setContentTitle("GO_LiFE Service")
                 .setContentText("Service is running!!!")
                 .setSmallIcon(R.drawable.ic_android)
                 .setContentIntent(pendingIntent)
@@ -477,6 +502,8 @@ public class BackGroundService extends Service {
         Log.d("GPS", "onCreate: ");
 
     }
+
+
 
     @Override
     public void onDestroy() {
