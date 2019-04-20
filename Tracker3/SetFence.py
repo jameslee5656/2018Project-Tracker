@@ -105,8 +105,15 @@ class electricFence():
     #make the bounds
     def squareBounds(self,boundScale = 1):#baseLocation = [24.938590,121.360761]
         #checking boundScale
+        
         lattestData = max(self.jsonData[self.user], key=lambda x:x['timestamp'])
         baseLocation = [lattestData['latitude'],lattestData['longitude']]
+        while baseLocation == ['', '']:
+            self.jsonData[self.user].remove(lattestData)
+            lattestData = max(self.jsonData[self.user], key=lambda x:x['timestamp'])
+            baseLocation = [lattestData['latitude'],lattestData['longitude']]
+            
+
         # print(baseLocation)
         #checking boundScale
         if type(boundScale) != 'int':
@@ -242,13 +249,13 @@ class electricFence():
         return spacelist,newlist,baseLocation
 
 
-# user = 'james' 
-# userlist = ['james'] 
-# elFence = electricFence() 
-# elFence.pullData(user,userlist) 
-# elFence.onlySanxia() 
-# elFence.removeOutlier() 
-# spacelist,valuelist,base = elFence.squareBounds() 
+user = 'james' 
+userlist = ['james'] 
+elFence = electricFence() 
+elFence.pullData(user,userlist) 
+elFence.onlySanxia() 
+elFence.removeOutlier() 
+spacelist,valuelist,base = elFence.squareBounds() 
 # # print(spacelist) 
 # print(valuelist)
 # # print(base)
