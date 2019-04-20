@@ -12,9 +12,6 @@ import numpy as np
 from sklearn import preprocessing
 
 from copy import deepcopy
-from IPython.display import clear_output
-
-# from __future__ import print_function
 
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.datasets.samples_generator import make_blobs
