@@ -51,9 +51,9 @@ for i, row in enumerate(dfspark.values):
 month = datetime.datetime.fromtimestamp(dfspark['timestamp'].max()).strftime('%m')
 dfespercent.loc[(dfespercent['day'] == day) & (dfespercent['month'] == month), ['exercisetime']] = period
 dfespercent['exercisetime'] = dfespercent['exercisetime'] / 86400
-print(dfespercent)
+# print(dfespercent)
 
-dfespercent.loc[(dfespercent['day'] == 3) & (dfespercent['month'] == 29), ['exercisetime']]
+print(float((dfespercent.loc[(dfespercent['day'] == '15') & (dfespercent['month'] == '04'), ['exercisetime']]).values[0]))
 # plot = plt.figure(figsize=(12,10)).gca()
 # plot.scatter(dfspark.hr_value, dfspark.step_value, c=dfspark.prediction)
 # plot.set_xlabel('x')
