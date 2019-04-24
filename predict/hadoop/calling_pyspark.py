@@ -1,8 +1,8 @@
+from flask import Flask, render_template,url_for,request,jsonify
 import subprocess
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime, time
-
 
 def callspark(user='james'):
 	python3_command = "./pyspark_class.py -u " + user  # launch your python2 script using bash
@@ -17,48 +17,57 @@ def callspark(user='james'):
 	dfspark = pd.read_csv('out.csv')
 	return dfspark
 
+@app.route("/", methods=['GET','POST'])
+def home():
+	return render_template('index.html')
 
-# this is the main fuction first argument 
-# is the user you want to look at
-dfspark = pd.DataFrame()
-dfspark = callspark('leo')
+@app.route("/percentage_api", methods=['GET','POST'])
+def percentage_api():
+	date = request.args.get('date')
 
-# I produce a dfespercent to calculate the percentage of exercise time
-dfespercent = pd.DataFrame({'month': [], 'day': []})
-day = datetime.datetime.fromtimestamp(dfspark['timestamp'].min()).strftime('%d')
-month = datetime.datetime.fromtimestamp(dfspark['timestamp'].min()).strftime('%m')
-basetime = dfspark['timestamp'].min()
-while day != datetime.datetime.fromtimestamp(dfspark['timestamp'].max()).strftime('%d') \
-    or month != datetime.datetime.fromtimestamp(dfspark['timestamp'].max()).strftime('%m'):
-    df2 = pd.DataFrame({'month': [month], 'day': [day], 'exercisetime':0})
-    dfespercent = dfespercent.append(df2, ignore_index=True)
-    basetime = (datetime.datetime.fromtimestamp(basetime) + datetime.timedelta(days=1)).timestamp()
-    day = datetime.datetime.fromtimestamp(basetime).strftime('%d')
-    month = datetime.datetime.fromtimestamp(basetime).strftime('%m')
+	# this is the main fuction first argument 
+	# is the user you want to look at
+	dfspark = pd.DataFrame()
+	dfspark = callspark('leo')
 
-day = datetime.datetime.fromtimestamp(dfspark['timestamp'].min()).strftime('%d')
-dfspark['timedelta'] = dfspark['timestamp'].diff()
-period = 0
-for i, row in enumerate(dfspark.values):
-	_id , prediction, hr_value, step_value, timestamp, timedelta = row
-	if int(prediction) == 1:
-		period += timedelta
-	if day != datetime.datetime.fromtimestamp(timestamp).strftime('%d'):
-		month = datetime.datetime.fromtimestamp(timestamp).strftime('%m')
-		dfespercent.loc[(dfespercent['day'] == day) & (dfespercent['month'] == month), ['exercisetime']] = period
-		period = 0
-		day = datetime.datetime.fromtimestamp(timestamp).strftime('%d')
-month = datetime.datetime.fromtimestamp(dfspark['timestamp'].max()).strftime('%m')
-dfespercent.loc[(dfespercent['day'] == day) & (dfespercent['month'] == month), ['exercisetime']] = period
-dfespercent['exercisetime'] = dfespercent['exercisetime'] / 86400
-# print(dfespercent)
+	# I produce a dfespercent to calculate the percentage of exercise time
+	dfespercent = pd.DataFrame({'month': [], 'day': []})
+	day = datetime.datetime.fromtimestamp(dfspark['timestamp'].min()).strftime('%d')
+	month = datetime.datetime.fromtimestamp(dfspark['timestamp'].min()).strftime('%m')
+	basetime = dfspark['timestamp'].min()
+	while day != datetime.datetime.fromtimestamp(dfspark['timestamp'].max()).strftime('%d') \
+    	or month != datetime.datetime.fromtimestamp(dfspark['timestamp'].max()).strftime('%m'):
+    	df2 = pd.DataFrame({'month': [month], 'day': [day], 'exercisetime':0})
+    	dfespercent = dfespercent.append(df2, ignore_index=True)
+    	basetime = (datetime.datetime.fromtimestamp(basetime) + datetime.timedelta(days=1)).timestamp()
+    	day = datetime.datetime.fromtimestamp(basetime).strftime('%d')
+    	month = datetime.datetime.fromtimestamp(basetime).strftime('%m')
 
-print(float((dfespercent.loc[(dfespercent['day'] == '15') & (dfespercent['month'] == '04'), ['exercisetime']]).values[0]))
-# plot = plt.figure(figsize=(12,10)).gca()
-# plot.scatter(dfspark.hr_value, dfspark.step_value, c=dfspark.prediction)
-# plot.set_xlabel('x')
-# plot.set_ylabel('y')
-# plt.show()
+	day = datetime.datetime.fromtimestamp(dfspark['timestamp'].min()).strftime('%d')
+	dfspark['timedelta'] = dfspark['timestamp'].diff()
+	period = 0
+	for i, row in enumerate(dfspark.values):
+		_id , prediction, hr_value, step_value, timestamp, timedelta = row
+		if int(prediction) == 1:
+			period += timedelta
+		if day != datetime.datetime.fromtimestamp(timestamp).strftime('%d'):
+			month = datetime.datetime.fromtimestamp(timestamp).strftime('%m')
+			dfespercent.loc[(dfespercent['day'] == day) & (dfespercent['month'] == month), ['exercisetime']] = period
+			period = 0
+			day = datetime.datetime.fromtimestamp(timestamp).strftime('%d')
+	month = datetime.datetime.fromtimestamp(dfspark['timestamp'].max()).strftime('%m')
+	dfespercent.loc[(dfespercent['day'] == day) & (dfespercent['month'] == month), ['exercisetime']] = period
+	dfespercent['exercisetime'] = dfespercent['exercisetime'] / 86400
+	# print(dfespercent)
 
+	percentage = float((dfespercent.loc[(dfespercent['day'] == 3) & (dfespercent['month'] == 29), ['exercisetime']]).values[0])
+	# plot = plt.figure(figsize=(12,10)).gca()
+	# plot.scatter(dfspark.hr_value, dfspark.step_value, c=dfspark.prediction)
+	# plot.set_xlabel('x')
+	# plot.set_ylabel('y')
+	# plt.show()
 
+	return jsonify(percentage)
 
+if __name__ == '__main__':
+    app.run(host = "localhost",debug=True)
