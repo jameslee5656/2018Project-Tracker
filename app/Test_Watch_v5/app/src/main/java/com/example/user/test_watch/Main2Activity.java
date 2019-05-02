@@ -2,6 +2,7 @@ package com.example.user.test_watch;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,9 +28,11 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.golife.contract.AppContract;
+import com.golife.customizeclass.CareAlarm;
 import com.golife.customizeclass.CareMeasureHR;
 import com.golife.customizeclass.ScanBluetoothDevice;
 import com.golife.customizeclass.SetCareSetting;
@@ -43,9 +46,12 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import  static com.example.user.test_watch.App._goFITSdk;
 import  static com.example.user.test_watch.App.isSync;
-import  static com.example.user.test_watch.App.isScan;
+
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -59,8 +65,11 @@ public class Main2Activity extends AppCompatActivity {
     private TextView o2_value;
     private TextView step_value;
     private TextView gps_value;
-    private  ImageButton start_service;
-    private  ImageButton stop_service ;
+    private ImageButton start_service;
+    private ImageButton stop_service ;
+
+    //private TimePickerDialog timePickerDialog;
+
     private BluetoothAdapter mBluetoothAdapter  = BluetoothAdapter.getDefaultAdapter();
     private String mac = null;
     private CheckBox cb;
@@ -102,17 +111,26 @@ public class Main2Activity extends AppCompatActivity {
             public void onClick(View v) {
                 SharedPreferences setting_watch =getSharedPreferences("watch_info",MODE_PRIVATE);
                 String macAddress = setting_watch.getString("macAddress", "");
+
                 Log.d("MAIN", "onClick: "+macAddress);
                 //第一次連線
-                if(!isScan&&!cb.isChecked()){
+                if(!cb.isChecked()){
+                    //清空
+                    setting_watch.edit().putString("macAddress","")
+                                        .putString("productID","")
+                                        .putString("pairingCode","")
+                                        .putString("pairingTime","")
+                                        .commit();
                     scan(v);
                 }else{
-                    //先前以記住mac
-                    if(macAddress==null) {
-                        Toast.makeText(Main2Activity.this,"您先前尚未配對任何連線",Toast.LENGTH_LONG).show();
+                    //先前已記住mac
+                    Log.d("MAIN", "onClick2: "+macAddress);
+                    if(macAddress=="") {
+                        Log.d("MAIN", "onClick3: "+macAddress);
+                        Toast.makeText(Main2Activity.this,"您先前尚未配對任何連線",Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    isScan=true;
+
                 }
 
                 Intent i = new Intent(getApplicationContext(), BackGroundService.class);
@@ -157,6 +175,10 @@ public class Main2Activity extends AppCompatActivity {
         return false;
     }
 
+    /*
+    public void setTime(View v){
+        timePickerDialog.show();
+    }*/
 
 
     @Override
@@ -171,23 +193,19 @@ public class Main2Activity extends AppCompatActivity {
         start_service = (ImageButton)findViewById(R.id.start_service);
         stop_service = (ImageButton)findViewById(R.id.stop_service);
         final TextView watchstatus = (TextView) findViewById(R.id.watchstatus);
-
-
         cb =(CheckBox)findViewById(R.id.checkBox);
-        cb.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener(){
+
+        /*
+        GregorianCalendar calendar=new GregorianCalendar();
+        timePickerDialog=new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                switch (buttonView.getId()){
-                    case R.id.checkBox:
-                        if(isChecked){
-                            isScan=true;
-                        }else{
-                            isScan=false;
-                        }
-                        break;
-                }
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+
             }
-        });
+        },calendar.get(Calendar.HOUR_OF_DAY),calendar.get(Calendar.MINUTE),false);
+    */
+
+
         //開藍芽
         if(!mBluetoothAdapter.isEnabled()){
             mBluetoothAdapter.enable();
@@ -358,7 +376,7 @@ public class Main2Activity extends AppCompatActivity {
                                                         .putString("pairingCode",newcode)
                                                         .putString("pairingTime",s1)
                                                         .commit();
-                                                isScan=true;
+
                                                 Log.d("MAIN", mac+"_"+ScanResult.getProductID()+"_"+newcode+"_"+s1);
                                             }
 
@@ -440,12 +458,7 @@ public class Main2Activity extends AppCompatActivity {
 
     //get health data and clear data (include 2 api)
     public void GetHealthData(){
-        /*
-        final TextView hr_value = (TextView) findViewById(R.id.hr_value);
-        final TextView o2_value = (TextView) findViewById(R.id.o2_value);
-        final TextView step_value = (TextView) findViewById(R.id.step_value);
-        final TextView gps_value = (TextView) findViewById(R.id.gps_value);
-        */
+
         final Handler ToastHandler = new Handler();
         final String _tag = "MAIN";
         Log.d("MAIN", "GetHealthData: ");
