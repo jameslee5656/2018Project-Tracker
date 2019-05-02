@@ -58,7 +58,6 @@ import  static com.example.user.test_watch.App.CHANNEL_ID;
 import static com.example.user.test_watch.App._goFITSdk;
 import  static com.example.user.test_watch.App.isSync;
 import  static com.example.user.test_watch.App.Name;
-import  static com.example.user.test_watch.App.isScan;
 import java.util.Calendar;
 
 public class BackGroundService extends Service {
@@ -75,6 +74,7 @@ public class BackGroundService extends Service {
     private static MqttAndroidClient client;
     private MqttConnectOptions conOpt;
     String clientId = MqttClient.generateClientId();
+
 
     //x,y 實際位置;lastX,lastY最後位置
     String x = "";
@@ -94,6 +94,9 @@ public class BackGroundService extends Service {
         public void run() {
             // Insert custom code here
             Log.d("GPS", "run Thread    "+isSync);
+
+            SharedPreferences setting_watch =getSharedPreferences("watch_info",MODE_PRIVATE);
+            String macAddress = setting_watch.getString("macAddress", "");
             if(mBluetoothAdapter.isEnabled()&&checkNetWork()){
 
                 try{
@@ -120,7 +123,7 @@ public class BackGroundService extends Service {
                         }
                         pub(hr, o2, step);
 
-                    }else if(!_goFITSdk.isBLEConnect()&&isScan){
+                    }else if(!_goFITSdk.isBLEConnect() && macAddress!=""){
                         //斷線
                         Calendar calendar = Calendar.getInstance();
                         long nowTime=calendar.getTimeInMillis();
@@ -138,8 +141,6 @@ public class BackGroundService extends Service {
                             }
                             pub("","","");
 
-                            SharedPreferences setting_watch = getSharedPreferences("watch_info", MODE_PRIVATE);
-                            String macAddress = setting_watch.getString("macAddress", "");
                             String productID = setting_watch.getString("productID", "");
                             String pairingCode = setting_watch.getString("pairingCode", "");
                             String pairingTime = setting_watch.getString("pairingTime", "");
@@ -165,7 +166,7 @@ public class BackGroundService extends Service {
                             Log.d("GPS", "BLE connect fail in Thread");
                         }else{
                             //超過10分鐘，停止服務
-                            Log.d("GPS", "Destory service");
+                            Log.d("GPS", "Destroy service");
                             _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,"連線逾時","end");
                             _goFITSdk.doDisconnectDevice();
 
@@ -508,7 +509,6 @@ public class BackGroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        isScan=false;
         Log.d("GPS", "onDestroy: ");
         try {
             client.disconnect();

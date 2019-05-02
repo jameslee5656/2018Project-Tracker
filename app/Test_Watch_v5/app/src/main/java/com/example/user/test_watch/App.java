@@ -11,7 +11,6 @@ public class App extends Application {
     public static final String CHANNEL_ID = "ServiceChannel";
     public static GoFITSdk _goFITSdk = null;
     public static Boolean isSync = true;
-    public static Boolean isScan = false;
     public static String Name="";
     @Override
     public void onCreate() {
