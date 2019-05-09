@@ -24,7 +24,6 @@ class electricFence():
     def pullData(self, user, userlist, minDate = 1514736000000, maxDate = time.time() * 1000): #pull latitude and longitude
         self.user = user
         self.userlist = userlist
-        print(userlist)
         for x in userlist:
             client = MongoClient('120.126.136.17',27017)
             db = client['Tracker']
@@ -49,7 +48,7 @@ class electricFence():
 
     def onlySanxia(self):
 #         Too slow
-        '''with open('geography.gml', encoding = 'utf8') as file:
+        with open('geography.gml', encoding = 'utf8') as file:
             tree = ElementTree.parse(file)
             root = tree.getroot()
             for i in range(len(root)):
@@ -65,10 +64,10 @@ class electricFence():
             if sacrifice % 10 == 0:    
                 boardData.append([x[0],x[1]])
             sacrifice += 1
-        borderPath = mplPath.Path(boardData)'''
+        borderPath = mplPath.Path(boardData)
         for x in range(len(self.latitude)):
-            # if borderPath.contains_points(np.array([[self.longitude[x], self.latitude[x]]])):       
-            self.location.append([round(self.latitude[x],4), round(self.longitude[x],4)])
+            if borderPath.contains_points(np.array([[self.longitude[x], self.latitude[x]]])):       
+                self.location.append([round(self.latitude[x],4), round(self.longitude[x],4)])
                 
     def removeOutlier(self):
         #remove that the variance is too large
@@ -104,16 +103,17 @@ class electricFence():
         return self.chosenPoint
     
     #make the bounds
-    def squareBounds(self,boundScale = 1,baseLocation = [0,0]):#baseLocation = [24.938590,121.360761]
+    def squareBounds(self,boundScale = 1):#baseLocation = [24.938590,121.360761]
         #checking boundScale
-        if baseLocation == [0,0]:
+        
+        lattestData = max(self.jsonData[self.user], key=lambda x:x['timestamp'])
+        baseLocation = [lattestData['latitude'],lattestData['longitude']]
+        while baseLocation == ['', '']:
+            self.jsonData[self.user].remove(lattestData)
             lattestData = max(self.jsonData[self.user], key=lambda x:x['timestamp'])
             baseLocation = [lattestData['latitude'],lattestData['longitude']]
-            while baseLocation == ['', '']:
-                self.jsonData[self.user].remove(lattestData)
-                lattestData = max(self.jsonData[self.user], key=lambda x:x['timestamp'])
-                baseLocation = [lattestData['latitude'],lattestData['longitude']]
-                
+            
+
         # print(baseLocation)
         #checking boundScale
         if type(boundScale) != 'int':
@@ -193,7 +193,6 @@ class electricFence():
                     boundlist.append([lt,rt,rd,ld,precentage,org_values])
                     
         squarelen = int(math.sqrt(len(boundlist)))
-        # print(squarelen,'\n\n////')
         spacelist = []
         #imply from bottomleft to topright
         # temptlist.append(boundlist[0][3])
@@ -241,7 +240,6 @@ class electricFence():
         valuelist = sorted(valuelist,key=lambda x: x[5],reverse=True)
 #         sortNum = 1
         newlist = []
-        # print(valuelist[0])
         # print(valuelist)
         for x in valuelist:
             tempt = x[0:6]
@@ -254,10 +252,10 @@ class electricFence():
 user = 'james' 
 userlist = ['james'] 
 elFence = electricFence() 
-elFence.pullData(user,userlist)
+elFence.pullData(user,userlist) 
 elFence.onlySanxia() 
 elFence.removeOutlier() 
 spacelist,valuelist,base = elFence.squareBounds() 
-# print(spacelist) 
+# # print(spacelist) 
 # print(valuelist)
-# print(base)
+# # print(base)

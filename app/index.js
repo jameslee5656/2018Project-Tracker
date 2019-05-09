@@ -183,12 +183,55 @@ MongoClient.connect(url,{useNewUrlParser: true},function(err,client){
                          db.collection('rank')
                                 .findOne({'user':name,'year':year,'month':month,'day':day,'hour':hour},function(err,p){
                                 if(p == null){
-                                        response.json("No this pediction");
-                                        console.log("No this pediction");
+                                        response.json("No this Rank");
+                                        console.log("No this Rank");
                                 }else{
                                 	//post data
-                                        response.json(p);
-                                        console.log('getHourData success');
+                                		var compare = {};
+                                		for(var pkey in p){
+                                			//check if the property/key is defined in theobject itself, not in parent
+                                			// if (p.hasOwnProperty(key)){
+                                			// 	console.log(key, p[key]);
+                                			// }
+                                			if ((pkey != 'day') & (pkey != '_id') & (pkey != 'hour')
+                                				 & (pkey != 'month') & (pkey != 'year') & (pkey != 'user')){
+                                				// console.log(key, p[key]);
+                                				compare[pkey] = p[pkey];
+                                			}
+                                		}
+                                		// create items array
+                                		var items = Object.keys(compare).map(function(key) {
+  											return [key, compare[key]];
+										});
+                                		// sort the array based on the second element
+                                		items.sort(function(first, second){
+                                			return second[1] - first[1];
+                                		});
+                                		var responseMss = "";
+                                		for(index = 0; index < items.length; index++){
+                                			if (items[index][0] == p.user){
+                                				responseMss += String(index + 1);
+                                				responseMss += '/'+ String(items.length + 1)
+                                				if (index == 0){
+                                					responseMss += ' None';
+                                				}
+                                				else{
+                                					responseMss += ' ' + items[index - 1][0] + ':' + String(items[index - 1][1] * -1)
+                                				}
+                                				if (index == items.length-1){
+                                					responseMss += ' None';
+                                				}
+                                				else{
+                                					responseMss += ' ' + items[index + 1][0] + ':+' + String(items[index + 1][1] * -1)
+                                				}
+                                			}
+
+                                		}
+                                		console.log(responseMss);
+                                		
+
+                                        response.json(responseMss);
+                                        console.log('getRank success');
                                 	}
                                 })
                 });

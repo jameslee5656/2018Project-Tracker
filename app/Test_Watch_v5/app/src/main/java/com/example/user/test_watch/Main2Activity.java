@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -218,9 +219,16 @@ public class Main2Activity extends AppCompatActivity {
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String response) throws Exception {
-//                        _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.GMail,"今日目標    "+response+"步","getDay");
-//                        Toast.makeText(Main2Activity.this, response, Toast.LENGTH_SHORT).show();
+                        _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.GMail,response,"getRank");
+                        Toast.makeText(Main2Activity.this, response, Toast.LENGTH_SHORT).show();
                         Log.i("debug", response);
+//                        TimeUnit.SECONDS.sleep(10);
+//                        try {
+//                            Thread.sleep(3000);
+//                        }catch(InterruptedException e){
+//                            Log.i("debug", "InterruptedException");
+//                        }
+//                        _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.GMail,"hello","getRank");
                     }
                 }));
     }
