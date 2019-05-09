@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.user.test_watch.Retrofit.IMyService;
+import com.example.user.test_watch.Retrofit.RetrofitClient;
 import com.golife.contract.AppContract;
 import com.golife.customizeclass.CareAlarm;
 import com.golife.customizeclass.CareMeasureHR;
@@ -46,8 +49,19 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
 
 import  static com.example.user.test_watch.App._goFITSdk;
 import  static com.example.user.test_watch.App.isSync;
@@ -180,6 +194,36 @@ public class Main2Activity extends AppCompatActivity {
         timePickerDialog.show();
     }*/
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void getData(View v){
+        CompositeDisposable compositeDisposable = new CompositeDisposable();
+        IMyService iMyService;
+
+        Retrofit retrofitClient = RetrofitClient.getInstance();
+        iMyService = retrofitClient.create(IMyService.class);
+
+        String n="james";
+        Date date = new Date();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Taipei"));
+        cal.setTime(date);
+        int y = cal.get(Calendar.YEAR);
+        int m = cal.get(Calendar.MONTH) + 1;
+        int d = cal.get(Calendar.DAY_OF_MONTH);
+        int h = cal.get(Calendar.HOUR_OF_DAY);
+        String concat = Integer.toString(y) + Integer.toString(m) + Integer.toString(d) + Integer.toString(h);
+        Toast.makeText(Main2Activity.this,concat, Toast.LENGTH_SHORT).show();
+        compositeDisposable.add(iMyService.getRank(n,y,m,d,h)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String response) throws Exception {
+//                        _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.GMail,"今日目標    "+response+"步","getDay");
+//                        Toast.makeText(Main2Activity.this, response, Toast.LENGTH_SHORT).show();
+                        Log.i("debug", response);
+                    }
+                }));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

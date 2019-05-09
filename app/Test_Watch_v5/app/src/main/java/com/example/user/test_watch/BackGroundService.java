@@ -33,6 +33,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.NotificationCompat;
 
+import com.example.user.test_watch.Retrofit.IMyService;
+import com.example.user.test_watch.Retrofit.RetrofitClient;
 import com.golife.contract.AppContract;
 import com.golife.customizeclass.ScanBluetoothDevice;
 import com.golife.database.table.TablePulseRecord;
@@ -60,6 +62,12 @@ import  static com.example.user.test_watch.App.isSync;
 import  static com.example.user.test_watch.App.Name;
 import java.util.Calendar;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
+
 public class BackGroundService extends Service {
 
 
@@ -85,7 +93,7 @@ public class BackGroundService extends Service {
     String lastX="";
     String lastY="";
     long disconnectTime =0;
-
+    boolean notFlag=true;
     private final Handler ServiceHandler = new Handler();
 
     // Define the code block to be executed
@@ -101,6 +109,8 @@ public class BackGroundService extends Service {
 
                 try{
                     if(isSync==false &&_goFITSdk.isBLEConnect()){
+
+                        //getData();
 
                         GetHealthData();
                         //紀錄座標
@@ -249,7 +259,7 @@ public class BackGroundService extends Service {
                 Log.d("GPS", "messageArrived: "+subMessage);
                 if(subMessage.equals("HR_HIGH")){
                     Log.d("GPS", "HR_HIGH");
-                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,"心律過快!","warning");
+                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,"心律過快!213212121212312312312131213123123","warning");
                 }
             }
 
@@ -370,8 +380,9 @@ public class BackGroundService extends Service {
 
             @Override
             public void onGetFitnessData(ArrayList<TableStepRecord> stepRecords, ArrayList<TableSleepRecord> sleepRecords, ArrayList<TablePulseRecord> hrRecords, ArrayList<TableSpO2Record> spo2Records) {
+                Log.d("SIZE", ""+stepRecords.size()+"_"+hrRecords.size()+"_"+spo2Records.size());
                 for(int i = 0; i < stepRecords.size(); i++){
-                    Log.i(_tag, "doSyncFitnessData() : onGetFitnessData() : step = " + stepRecords.get(i).getSteps() + "  timestamp : " + stepRecords.get(i).getTimestamp());
+                    Log.d("A", i+" step = " + stepRecords.get(i).getSteps() + "  timestamp : " + stepRecords.get(i).getTimestamp());
                     if(i == (stepRecords.size()-1)){
                         Log.d(_tag, "Current Step: " + stepRecords.get(i).getSteps());
                         step=Integer.toString(stepRecords.get(i).getSteps());
@@ -379,13 +390,14 @@ public class BackGroundService extends Service {
                     }
                 }
 
-                for (TableSleepRecord sleep : sleepRecords) {
-                    Log.i(_tag, "doSyncFitnessData() : onGetFitnessData() : sleep = " + sleep.toJSONString());
+                Log.d("87:", "sleep: start:" +sleepRecords.size());
+                for (int i = 0; i < sleepRecords.size(); i++) {
+                    Log.d("87:", "sleep: " + sleepRecords.get(i).getScore());
                 }
 
                 for(int i = 0; i < hrRecords.size(); i++){
 
-                    Log.i(_tag, "doSyncFitnessData() : onGetFitnessData() : hr = " + hrRecords.get(i).getPulse() + "  timestamp : " + hrRecords.get(i).getTimestamp());
+                    Log.d("A", i+" hr = " + hrRecords.get(i).getPulse() + "  timestamp : " + hrRecords.get(i).getTimestamp());
                     if(i == (hrRecords.size()-1)){
                         Log.d(_tag, "Current HR: " + hrRecords.get(i).getPulse());
                         hr=Integer.toString(hrRecords.get(i).getPulse());
@@ -394,7 +406,7 @@ public class BackGroundService extends Service {
                 }
 
                 for(int i = 0; i < spo2Records.size(); i++){
-                    Log.i(_tag, "doSyncFitnessData() : onGetFitnessData() : hr = " + spo2Records.get(i).getSpO2() + "  timestamp : " + spo2Records.get(i).getTimestamp());
+                    Log.d("A", i+" o2 = " + spo2Records.get(i).getSpO2() + "  timestamp : " + spo2Records.get(i).getTimestamp());
                     if(i == (spo2Records.size()-1)){
                         Log.d(_tag, "Current o2: " + spo2Records.get(i).getSpO2());
                         o2=Integer.toString(spo2Records.get(i).getSpO2());
@@ -409,6 +421,27 @@ public class BackGroundService extends Service {
                 Log.i(_tag, "onFailure: " + i);
             }
         });
+    }
+
+    public void getData(){
+        CompositeDisposable compositeDisposable = new CompositeDisposable();
+        IMyService iMyService;
+
+        Retrofit retrofitClient = RetrofitClient.getInstance();
+        iMyService = retrofitClient.create(IMyService.class);
+
+        String n="james";
+        int y=2019,m=5,d=6;
+        compositeDisposable.add(iMyService.getDayData(n,y,m,d)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String response) throws Exception {
+                        _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,"今日目標    "+response+"步","getDay");
+                        Log.d("test", response);
+                    }
+                }));
     }
 
     @Nullable
