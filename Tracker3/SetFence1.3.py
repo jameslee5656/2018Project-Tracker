@@ -58,7 +58,7 @@ class electricFence():
         # Let baseLocation be the lattest data
         if baseLocation == [0,0]:
             lattestData = self.df[-1:]
-            baseLocation = [lattestData['latitude'], lattestData['longitude']]
+            baseLocation = [float(lattestData['latitude']), float(lattestData['longitude'])]
                 
         #checking boundScale
         if type(boundScale) != 'int':
@@ -191,6 +191,7 @@ class electricFence():
 #             tempt.append(sortNum)
 #             sortNum += 1
             newlist.append(tempt)
+        # print(type(spacelist))
         return spacelist,newlist,baseLocation
 
 
@@ -199,6 +200,7 @@ userlist = ['james']
 elFence = electricFence() 
 elFence.pullData(user,userlist,days=14)
 spacelist,valuelist,base = elFence.squareBounds() 
-print(spacelist) 
+# print(spacelist) 
+# print(type(spacelist[0][0][0]))
 # print(valuelist)
 # print(base)
