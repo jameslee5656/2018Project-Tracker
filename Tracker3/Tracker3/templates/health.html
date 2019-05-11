@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <title>運動手環之智慧健康管理系統</title>
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+
+    <link rel="stylesheet" href="/static/css/health.css" />
+
+    <!-- Jquery-UI -->
+    <link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css" />
+    <link rel="stylesheet" href="/static/css/slider.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-grid.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+</head>
+<body style="background-color: #f1f1f1;">
+    <div class="nav">
+        <div class="nav-title">
+            歷史分析頁面
+            <div class="nav-people" onclick="nav_people_show();">選擇 : {{ person }}</div>
+            <div class="nav-menu" onclick="nav_menu_show();">MENU<i class="fas fa-bars" style="padding-left: 10px;"></i></div>
+        </div>
+    </div>
+    <div id="nav-people" class="nav-menu-hidden">
+        <div class="nav-menu-people">
+            <div class="menu_close" onclick="nav_people_show();"></div>
+            <h3>選擇分析人物</h3>
+            <div class="nav-menu-person-con">
+                {% for friend in Friends %}
+                    <form method="POST" action="{{ url_for('change_person')}}">
+                        <input type="submit" name="change" value="{{ friend }}" class="nav-menu-person" >
+                    </form>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div id="nav-menu" class="nav-menu-hidden">
+        <div class="nav-menu-menu">
+            <div class="menu_close" onclick="nav_menu_show();"></div>
+            <h3>MENU</h3>
+            <a href="{{url_for('home')}}" class="menu_option">首頁</a>
+            <a href="{{url_for('supervise')}}" class="menu_option">地圖</a>
+            <a href="{{url_for('health')}}" class="menu_option">分析</a>
+            <a href="{{url_for('user_information')}}" class="menu_option">好友</a>
+        </div>
+    </div>
+    <div id="closebg"></div>
+    <div class="container" style="padding-top: 56px;">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="person-con">
+                    <div class="health-title">
+                        <div class="health-title-text">
+                            歷史生理資訊
+                        </div>
+                        <div id="health-btn-hr" class="health-btn" onclick="chartShowHr();"><i class="fas fa-heartbeat" style="padding-right: 16px;"></i>心律</div>
+                        <div id="health-btn-ox" class="health-btn" onclick="chartShowOx();"><i class="fas fa-tint" style="padding-right: 20px;"></i>血氧</div>
+                        <div id="health-btn-st" class="health-btn" onclick="chartShowSt();"><i class="fas fa-shoe-prints" style="padding-right: 10px;"></i>步數</div>
+                    </div>
+                    <div class="health-box">
+                        <div class="person-date">
+                                選擇日期
+                                <input type="text" name="date" id="date" onchange="showall()" />
+                                <div id="switch-container-hr">
+                                    <div class="switch-inner-container">
+                                        <div class="switch-toggle">
+                                            <p>Week</p>
+                                        </div>
+                                        <div class="switch-toggle">
+                                            <p>Day</p>
+                                        </div>
+                                    </div>
+                                    <div class="switch-inner-container" id='switch-toggle-container-hr'>
+                                        <div class="switch-toggle">
+                                            <p>Week</p>
+                                        </div>
+                                        <div class="switch-toggle">
+                                            <p>Day</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <div id="chart-box-hr" class="chart-box chart-box-hidden">
+                            <div class="myChart-box" style="width:300px;height:180px;">
+                                <canvas id="myChart_HR"></canvas>
+                            </div>
+                        </div>
+                        <div id="chart-box-ox" class="chart-box chart-box-hidden">
+                            <!-- <div id="switch-container-ox">
+                                <div class="switch-inner-container">
+                                    <div class="switch-toggle">
+                                        <p>Week</p>
+                                    </div>
+                                    <div class="switch-toggle">
+                                        <p>Day</p>
+                                    </div>
+                                </div>
+                                <div class="switch-inner-container" id='switch-toggle-container-ox'>
+                                    <div class="switch-toggle">
+                                        <p>Week</p>
+                                    </div>
+                                    <div class="switch-toggle">
+                                        <p>Day</p>
+                                    </div>
+                                </div>
+                            </div> -->
+                            <div class="myChart-box" style="width:300px;height:180px;">
+                                <canvas id="myChart_OX"></canvas>
+                            </div>
+                        </div>
+
+                        <div id="chart-box-st" class="chart-box chart-box-hidden">
+                            <!-- <div id="switch-container-st">
+                                <div class="switch-inner-container">
+                                    <div class="switch-toggle">
+                                        <p>Week</p>
+                                    </div>
+                                    <div class="switch-toggle">
+                                        <p>Day</p>
+                                    </div>
+                                </div>
+                                <div class="switch-inner-container" id='switch-toggle-container-st'>
+                                    <div class="switch-toggle">
+                                        <p>Week</p>
+                                    </div>
+                                    <div class="switch-toggle">
+                                        <p>Day</p>
+                                    </div>
+                                </div>
+                            </div> -->
+                            <div class="myChart-box" style="width:300px;height:180px;">
+                                <canvas id="myChart_ST"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="person-con">
+                    <div class="heatmap-title">運動量熱圖分佈</div>
+                </div> 
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row" style="height: 500px;">
+            <div class="col-sm-12">
+                <div class="map-con">
+                    <div class="map-title">
+                        地圖歷史分析
+                        <i class="fas fa-bars map-menu" onclick="map_menu_toggle();"></i>
+                    </div>
+                    <div id="map-menu-drop" class="map-menu-drop-con map-menu-close">
+                        <div id="drop-grid" class="map-menu-drop" onclick="map_menu_change_heat();"><i class="fas fa-th" style="padding-right: 5px;"></i>切換成「格子模式」</div>
+                        <div id="drop-heat" class="map-menu-drop map-menu-change" onclick="map_menu_change_grid();"><i class="fas fa-burn" style="padding-right: 5px;"></i>切換成「熱圖模式」</div>
+                        <div id="color-change" class="map-menu-drop map-menu-change">
+                            <button class="jscolor {valueElement:'chosen-value', onFineChange:'setTextColor(this)'}">選擇格子顏色</button>
+                        </div>
+                        <div id="scale-change" class="map-menu-drop map-menu-change">
+                            <label for="FenceScaleSelect">分割大小:</label>
+                              <select id="FenceScaleSelect" name="FenceScale">
+                                <option id="FenceScaleDefault" selected="selected"></option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                              </select>
+                        </div>
+                    </div>
+                    <!-- Google map -->
+                    <div id="map_canvas"></div>
+                    <!-- Date Slider -->
+                      <div class="slider-con" id ="slider-con">
+                        <div>
+                          <input readonly="readonly" type="text" id="amount" class = "amount" size="100"/>
+                          <div class="button" id="submitDate" style="display: inline-block;">範圍確認</div>
+                        </div>
+                        <div id="slider-range"></div>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw&libraries=visualization"></script>
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/jquery-ui.js"></script>
+    <script>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        $(document).ready(function(){
+            $("#date").datepicker();
+        })
+    </script>
+    <script src="/static/js/health.js"></script>
+    <!-- Color palette -->
+    <script src="/static/js/jscolor.js"></script>
+    <script>
+    	//設定今天日期
+    	var today = new Date();
+    	var day = document.getElementById('date');
+    	console.log()
+    	day.value = (today.getMonth()+1).toString() + '/' + today.getDate().toString() + '/' + today.getFullYear().toString()
+
+    	button();
+    	showall();
+        chartShowHr();
+    </script>
+</body>
+</html>
