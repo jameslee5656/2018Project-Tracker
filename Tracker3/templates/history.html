@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <title>運動手環之智慧健康管理系統</title>
+  <!-- Main CSS -->
+  <link rel="stylesheet" type="text/css" href="/static/css/history.css" />
+  <link rel="stylesheet" href="/static/css/sidebar.css">
+  <!-- API -->
+  <link rel="stylesheet" href="/static/css/slider.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+</head>
+
+<body>
+  <!-- Side bar -->
+  <!-- <div id="sidebar">
+    <div class="toggle-btn" onclick="toggleSidebar()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="user">
+      <i class="far fa-times-circle fa-2x" onclick="toggleSidebar()" style = "color:#666666;margin-left:220px;margin-top:10px;cursor: pointer;"></i>
+      <ul>
+        <li>
+          <div class="circle">
+            <div class="inner" style="background-image: url('{{pic}}');"></div>
+          </div>
+          <p>{{user}}</p>
+        </li>
+      </ul>
+    </div>
+    <nav class="list">
+      <ul>
+        <li><a href = "{{ url_for('home') }}"><i class ="fas fa-home" ></i>首頁</a></li>
+      </ul>
+    </nav>
+    <nav class="list">
+      <ul>
+        <li><a href = "{{ url_for('supervise') }}"><i class ="fas fa-shoe-prints" ></i>即時追蹤</a></li>
+        <li><a href = "{{ url_for('history') }}" style="color:#EE7700"><i class ="fas fa-history" ></i>歷史分析</a></li>
+      </ul>
+    </nav>
+    <nav class="mid">
+      <ul>
+        <li><a href = "#"><i class ="fas fa-sliders-h" ></i>帳戶管理</a></li>
+      </ul>
+    </nav>
+    <nav class="tool">
+        <h3>設定</h3>
+        <form method="POST" action="{{ url_for('history_display') }}">
+            {{ select.csrf_token }}
+            <div class="set">
+                {{select.user.label}}
+                {{select.user}}
+            </div>
+            <div class="set">
+                {{ select.date.label }}
+                {{ select.date }}
+            </div>
+            <div class="set">
+                {{ select.begin_time.label }}
+                {{ select.begin_time }}
+            </div>
+            <div class="set">
+                {{ select.duration.label }}
+                {{ select.duration }}
+            </div>
+            <div class="set">
+                <input type="submit" value="顯示歷史路徑">
+            </div>
+        </form>
+        <div class="set">
+            <input type="submit" onclick="remove_line()" value="刪除歷史路徑">
+        </div>
+      </nav>
+      <nav class="tool">
+        <h3>熱點範圍</h3>
+        <div class="set">
+          <label for="FenceScaleSelect">分割大小:</label>
+          <select id="FenceScaleSelect" name="FenceScale">
+            <option id="FenceScaleDefault" selected="selected"></option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+        <div class="set">
+          <input type="submit" id='clearElectFence' value="顯示 / 刪除個人熱點" onclick="OpenOrCloseFence()">
+        </div>
+        <div class="set">
+            <button class="jscolor {valueElement:'chosen-value', onFineChange:'setTextColor(this)'}">選擇電子圍籬顏色</button>
+          </div>
+    </nav>
+  </div> -->
+
+  <!-- New Side bar -->
+    <div id="sidebar">
+      <div id="sidebar_toggle_btn" onclick="toggleSidebar()"><i id="caret-left" class="fas fa-caret-left caret-left"></i></div>
+      <div class="sidebar-con">
+        <div class="sidebar_box">
+          <div class="user-con">
+            <div class="user_pic" style="background-image: url('{{pic}}');">
+              <span class="pic_change">變更</span>
+              <label class="pic_change-mask" >
+                <input id="upload_pic" type="file" style="display: none;"></input>
+              </label>
+            </div>
+            <div class="user_info">
+              <div class="user_name">
+                <h2>LEO</h2>
+                <a href="{{ url_for('logout')}}">登出</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar_box">
+            <a href="{{ url_for('home') }}">
+              <div class="menu-con">
+                <div class="menu_icon-con">
+                  <i class ="fas fa-home fa-2x menu_icon" ></i>
+                </div>
+                <h3>首頁</h3>
+              </div>
+            </a>
+        </div>
+        <div class="sidebar_box">
+            <a href="{{ url_for('supervise') }}">
+              <div class="menu-con">
+                <div class="menu_icon-con">
+                  <i class ="fas fa-shoe-prints fa-2x menu_icon" ></i>
+                </div>
+                <h3>即時追蹤</h3>
+              </div>
+            </a>
+        </div>
+        <div class="sidebar_box">
+            <a href="{{ url_for('history') }}" class="nowpage">
+              <div class="menu-con">
+                <div class="menu_icon-con">
+                  <i class ="fas fa-history fa-2x menu_icon" ></i>
+                </div>
+                <h3>歷史分析</h3>
+              </div>
+            </a>
+        </div>
+      </div>
+    </div>
+
+  <!-- Date Slider -->
+  <div class="slider-con" id ="slider-con">
+    <script type="text/javascript">
+
+    </script>
+    <div>
+      <input readonly="readonly" type="text" id="amount" class = "amount" size="100"/>
+      <div class="button" id="submitDate" style="display: inline-block;">範圍確認</div>
+      <div class="button" id="submitDate" style="display: inline-block;">
+      熱點變化</div>
+    </div>
+    <div id="slider-range"></div>
+  </div>
+          
+  <!-- 360 scene -->
+  <div id="showpic-con">
+    <div class="cancel" onclick="remove()"><i class="fas fa-times fa-2x" style="color: rgba(0,0,0,0.6); cursor: pointer;"></i></div>
+    <div class="pic-con" id="pic-container"></div>
+  </div>
+
+  <!-- Google map -->
+  <div id="map_canvas"></div>
+
+  <!-- JS -->
+  <!-- Google map -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw&libraries=visualization"></script>
+  <!-- Jquery -->
+  <script src="https://code.jquery.com/jquery.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <!-- MQTT -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+  <!-- Color palette -->
+  <script src="/static/js/jscolor.js"></script>
+  <!-- History_main.js -->
+  <script>
+    var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, temp2 = 0, fenceInitialize = 0,
+    spacelng = 0, valuelng = 0, filenumber = 0;
+    // fenceInitialize = temp3 =>> whether the fence have been draw before
+    var numbers = '12345678910';
+    var counter = 0;
+    var polys = [], p;
+    var point_array = [];
+    var EF_array =[];
+    var EF_array1 = [];
+    var number_array = [];
+    var Global_color = '#000000';
+    var Global_spacelist = [];
+    var Global_valuelist = [];
+    var Global_fenceScale = 10;
+    var Global_centerlat;
+    var Global_centerlng;
+    var Global_date = [];
+    var HeatMapData = [];
+    function initialize(){
+      var myLatlng = new google.maps.LatLng(24.944, 121.3695);
+      var mapOptions = {
+        zoom: 16,
+        center: myLatlng,
+        zoomControl: true,
+        scaleControl: false,
+        rotateControl: false,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      }
+
+      if(getCookie('StartDate')){
+        console.log("get cookie");
+        Global_date[0] = getCookie('StartDate');
+        Global_date[1] = getCookie('EndDate');
+      }
+      else{
+        console.log("get date");
+        Global_date[0] = new Date('2018.01.01').getTime();
+        Global_date[1] = new Date().getTime();
+      }
+      map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+      map.addListener('idle', function() {
+        var c = map.getCenter();
+        Global_centerlat = map.getCenter().lat(); 
+        Global_centerlng = map.getCenter().lng();
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        $.getJSON($SCRIPT_ROOT + '/change_Date', {
+          startDate : Global_date[0],
+          endDate : Global_date[1],
+          lat : Global_centerlat,
+          lng : Global_centerlng,
+          fenceScale : Global_fenceScale
+            // send lat, lng through JQuery
+          }, function(data){
+            console.log('move change');
+            if(getCookie('FenceColor'))
+            {
+              Global_color = getCookie('FenceColor');
+            }
+            // flask send back data through JQuery
+            if(fenceInitialize == 0){
+              Global_spacelist = data[0];
+              Global_valuelist = data[1];
+              set_EF(data[0],data[1],Global_color);
+              fenceInitialize = 1;
+            }
+            else if(fenceInitialize == 1){
+              clear();
+              Global_spacelist = data[0];
+              Global_valuelist = data[1];
+              set_EF(data[0],data[1],Global_color);
+            }
+          }); 
+      });
+
+
+        // If the fenceScale change change cookie
+        // var optionListener = document.getElementById("FenceScaleSelect");
+        // optionListener.addEventListener("change", function() {
+
+        //   var option = optionListener.value;
+        //   setCookie('FenceScale', option);
+        //   Global_fenceScale = option;
+        //   $.getJSON($SCRIPT_ROOT + '/change_Date', {
+        //     startDate : Global_date[0],
+        //     endDate : Global_date[1],
+        //     lat : Global_centerlat,
+        //     lng : Global_centerlng,
+        //     fenceScale : Global_fenceScale
+        //         // send lat, lng through JQuery
+        //       }, function(data){
+        //         if(getCookie('FenceColor'))
+        //         {
+        //           Global_color = getCookie('FenceColor');
+        //         }
+        //         // flask send back data through JQuery
+        //         if(fenceInitialize == 0){
+        //           Global_spacelist = data[0];
+        //           Global_valuelist = data[1];
+        //           set_EF(data[0],data[1],Global_color);
+        //           fenceInitialize = 1;
+        //         }
+        //         else if(fenceInitialize == 1){
+        //           clear();
+        //           Global_spacelist = data[0];
+        //           Global_valuelist = data[1];
+        //           set_EF(data[0],data[1],Global_color);
+        //           fenceInitialize = 1;
+        //         }
+        //       });
+
+        //   var fenceScale;
+        //   if(getCookie('FenceScale'))
+        //   {
+        //     fenceScale = getCookie('FenceScale');
+        //   }
+        //   else
+        //   {
+        //     fenceScale = 10;
+        //   }
+        //   Global_fenceScale = fenceScale;
+        //   $('#FenceScaleDefault').text(fenceScale);
+        // });
+
+        var fenceScale;
+        if(getCookie('FenceScale'))
+        {
+          fenceScale = getCookie('FenceScale');
+        }
+        else
+        {
+          fenceScale = 10;
+        }
+        Global_fenceScale = fenceScale;
+        $('#FenceScaleDefault').text(fenceScale);
+        // Set FenceScale to be the cookie
+
+        $(function() {
+          var startd, endd;
+          if(getCookie('StartDate')){
+            startd = getCookie('StartDate');
+            endd = getCookie('EndDate');
+          }
+          else{
+            startd = new Date('2018.01.01').getTime();
+            endd = new Date().getTime();
+          }
+          $( "#slider-range" ).slider({
+            range: true,
+            min: new Date('2018.01.01').getTime(),
+            max: new Date().getTime(),
+              step: 86400, // every setp is one day
+              values: [ startd, endd],
+              slide: function( event, ui ) {
+                $( "#amount" ).val( (new Date(ui.values[ 0 ]).toDateString() ) + " - " + (new Date(ui.values[ 1 ])).toDateString() );
+                
+                if (Global_date.length == 0)
+                {
+                  Global_date.push(ui.values[0]);
+                  Global_date.push(ui.values[1]);
+                } 
+                else
+                {
+                  Global_date[0] = ui.values[0];
+                  Global_date[1] = ui.values[1];
+                }
+              }
+
+            });
+            //initial presentation
+            if(getCookie('StartDate')){
+              $( "#amount" ).val(new Date(parseInt(getCookie('StartDate'))).toDateString() +
+                " - " + (new Date(parseInt(getCookie('EndDate'))).toDateString()));
+            }
+            else{
+              $( "#amount" ).val( (new Date($( "#slider-range" ).slider( "values", 0 )).toDateString()) +
+                " - " + (new Date($( "#slider-range" ).slider( "values", 1 ))).toDateString());
+            }
+            
+          });
+
+        document.getElementById("submitDate").addEventListener("click", function () {
+          console.log(Global_date[0]);
+          console.log(Global_date[1]);
+          $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+          $.getJSON($SCRIPT_ROOT + '/change_Date', {
+            startDate : Global_date[0],
+            endDate : Global_date[1],
+            lat : Global_centerlat,
+            lng : Global_centerlng,
+            fenceScale : Global_fenceScale
+              //   // send lat, lng through JQuery
+            }, function(data){
+              console.log('change_Date');
+              if(getCookie('FenceColor'))
+              {
+                Global_color = getCookie('FenceColor');
+              }
+                // flask send back data through JQuery
+                setCookie('StartDate',Global_date[0]);
+                setCookie('EndDate',Global_date[1]);
+                if(fenceInitialize == 0){
+                  Global_spacelist = data[0];
+                  Global_valuelist = data[1];
+                  set_EF(data[0],data[1],Global_color);
+                  fenceInitialize = 1;
+                }
+                else if(fenceInitialize == 1){
+                  clear();
+                  console.log(data[0]);
+                  console.log(data[1]);
+                  Global_spacelist = data[0];
+                  Global_valuelist = data[1];
+                  set_EF(data[0],data[1],Global_color);
+                }
+              }); 
+        });
+
+
+      }
+
+      function setCookie(name, value)
+      {
+        document.cookie=name+"="+escape(value)+"; path=/;";
+      }
+
+      function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+          var c = ca[i];
+          while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+      }
+
+      function setline(){
+        var points= [];
+        {% for data in datas %}
+
+        var temp = {lat: {{data.latitude}}, lng: {{data.longitude}}};
+        points.push(temp);
+        {% endfor %}
+        console.log(points);
+        if(!polyline){
+          polyline = new google.maps.Polyline({
+            path: points,
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.7,
+            strokeWeight:  5
+          });
+        }
+        polyline.setMap(map);
+      }
+
+      function remove_line(){
+        polyline.setMap(null);
+      }
+
+      function set_area(points){
+        if(temp2 == 0){
+          var w = 0.00005;
+          var h = w;
+
+          for(var i = 0; i < points.length; i++){
+            var fence = [
+            {lat: points[i][0] + h, lng: points[i][1] - w},
+            {lat: points[i][0] + h, lng: points[i][1] + w},
+            {lat: points[i][0] - h, lng: points[i][1] + w},
+            {lat: points[i][0] - h, lng: points[i][1] - w}
+            ];
+
+            setarea = new google.maps.Polygon({
+              position: {lat: points[i][0], lng: points[i][1]},
+              path: fence,
+              strokeColor: '#FF0000',  
+              strokeOpacity: 0,  
+              strokeWeight: 1,  
+              fillColor: '#FF0000',  
+              fillOpacity: 0.4
+            });
+            point_array.push(setarea);
+            setarea.setMap(map);
+          }
+          temp2 = 1;
+        }
+        else{
+          for(var i = 0; i < points.length; i++){
+            point_array[i].setMap(null);
+          }
+          point_array = [];
+          temp2 = 0;
+        }
+      }
+
+      function set_EF(spacelist,valuelist,color){
+        spacelng = spacelist.length;
+        for(var i = 0; i < spacelist.length; i++){
+          var fence = [
+          // draw the rectangular four point
+          {lat: spacelist[i][0][0], lng: spacelist[i][0][1]},
+          {lat: spacelist[i][1][0], lng: spacelist[i][1][1]},
+          {lat: spacelist[i][2][0], lng: spacelist[i][2][1]},
+          {lat: spacelist[i][3][0], lng: spacelist[i][3][1]}
+          ]; 
+
+          setEF = new google.maps.Polygon({
+            position: {lat: spacelist[i][0][0], lng: spacelist[i][0][1]},
+            path: fence,
+            strokeColor: '#000000',  
+            strokeOpacity: 0,  
+            strokeWeight: 1,  
+            fillColor: '#000',  
+            fillOpacity: 0
+          });
+          EF_array.push(setEF);
+          setEF.setMap(map);
+        }
+        valuelng = valuelist.length;
+        for(var i = 0; i < valuelist.length; i++){
+          var fence = [
+          // draw the rectangular four point
+          {lat: valuelist[i][0][0], lng: valuelist[i][0][1]},
+          {lat: valuelist[i][1][0], lng: valuelist[i][1][1]},
+          {lat: valuelist[i][2][0], lng: valuelist[i][2][1]},
+          {lat: valuelist[i][3][0], lng: valuelist[i][3][1]}
+          ]; 
+
+          var c = valuelist[i][4];
+          // the scale from the value list
+          setEF1 = new google.maps.Polygon({
+            position: {lat: valuelist[i][0][0], lng: valuelist[i][0][1]},
+            path: fence,
+            strokeColor: '#000000',  
+            strokeOpacity: 0,  
+            strokeWeight: 1,  
+            fillColor: Global_color,  
+            // fillOpacity: 0.1*c
+            fillOpacity: 0 //change
+          });
+
+          if(i < 10){
+            num = numbers[i];
+            if(i == 9){
+              num = '10';
+            }
+            var latt = valuelist[i][0][0] + (valuelist[i][3][0] - valuelist[i][0][0])/2;
+            var lngg = valuelist[i][0][1] + (valuelist[i][1][1] - valuelist[i][0][1])/2;
+
+            var HeatMapLatLng = new google.maps.LatLng(latt,lngg);
+            HeatMapData.push(HeatMapLatLng);
+
+            keypoint = 
+            {lat: latt, lng: lngg};
+            marker = new google.maps.Marker({
+              position: keypoint,
+              label: num
+            });
+            // marker.setMap(map);
+            number_array.push(marker);
+
+            createRoute(setEF1,counter,valuelist);
+
+            google.maps.event.addListener(setEF1,'mouseover',function(){
+              this.setOptions({strokeColor: '#000000',strokeOpacity: 1, strokeWeight:2});
+            }); 
+            google.maps.event.addListener(setEF1,'mouseout',function(){
+             this.setOptions({strokeOpacity: 0});
+           }); 
+          }
+
+          EF_array1.push(setEF1);
+          setEF1.setMap(map);
+          counter++;
+        }
+        heatmap = new google.maps.visualization.HeatmapLayer({
+          data: HeatMapData,
+          radius: 60,
+          opacity: 0.5
+        });
+        heatmap.setMap(map);
+      }
+
+      function clear(){
+        for(var i = 0; i < spacelng; i++){
+          EF_array[i].setMap(null);
+        }
+        for(var i = 0; i < valuelng; i++){
+          EF_array1[i].setMap(null);
+          heatmap.setMap(null);
+        }
+        for(var i = 0; i < 10; i++){
+          if(number_array[i]){
+            number_array[i].setMap(null);
+          }
+        }
+        number_array = [];
+        EF_array = [];
+        EF_array1 = [];
+        HeatMapData =[];
+        counter = 0;
+      }
+      function setTextColor(picker) {
+        var color = '#' + picker.toString();
+        if(fenceInitialize== 1){
+          clear();
+          Global_color = color;
+          setCookie('FenceColor',Global_color)
+          set_EF(Global_spacelist,Global_valuelist,Global_color);
+        }
+        else if(fenceInitialize == 0){
+          Global_color = color;
+          setCookie('FenceColor',Global_color)
+          set_EF(Global_spacelist,Global_valuelist,Global_color);
+          fenceInitialize=1;
+        }
+      }
+
+      function remove(){
+        $('#showpic-con').removeClass('showpic-con');
+      }
+
+      function createRoute(marker, routenum, valuelist){
+        google.maps.event.addListener(marker,'click',function(){
+          var fenway = {lat : valuelist[routenum][0][0] - 0.0005,lng : valuelist[routenum][0][1] + 0.0005}; 
+          var panorama = new google.maps.StreetViewPanorama(
+            document.getElementById('pic-container'), {
+              position: fenway,
+              pov: {
+                heading: 34,
+                pitch: 10
+              }
+            });
+          map.setStreetView(panorama);
+          $('#showpic-con').addClass('showpic-con'); 
+        }); 
+      }
+
+      function OpenOrCloseFence(){
+        if(fenceInitialize == 0){
+          console.log("hi");
+          set_EF(Global_spacelist,Global_valuelist,Global_color);            
+          fenceInitialize = 1;
+        }
+        else{
+          clear();
+          fenceInitialize=0;
+        }
+      }
+
+      function toggleSidebar(){
+        document.getElementById("sidebar").classList.toggle('not-visible');
+        document.getElementById("caret-left").classList.toggle('caret-right');
+        document.getElementById("slider-con").classList.toggle('active');
+      }
+
+      $(function () {
+        initialize(null);
+        // toggleSidebar();
+      // set_EF({{ spacelist }},{{valuelist}},'#000000');
+    });
+  </script>
+
+</body>
+
+</html>

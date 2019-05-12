@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+    <title>運動手環之智慧健康管理系統</title>
+
+    <link href="http://terikon.github.io/marker-animate-unobtrusive/demo/unobtrusive/map.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/static/css/supervise.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/sidebar.css" />
+</head>
+  <body>
+    <!-- <div id="sidebar">
+      <div class="toggle-btn" onclick ="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class ="user">
+        <i class="fas fa-bars fa-2x" onclick="toggleSidebar()" style = "color:#666666;margin-left:220px;margin-top:10px;"></i>
+        <ul>
+          <li>
+            <div class="circle">
+              <div class="inner" style="background-image: url('{{pic}}');"></div>
+            </div>
+            <p>{{ user }}</p> 
+          </li>
+        </ul>
+      </div>
+      <nav class = "list">
+        <ul>
+          <li><a href = "{{ url_for('home') }}"><i class ="fas fa-home" ></i>首頁</a></li>
+          <li><a href = "{{ url_for('supervise') }}" style="color:#EE7700"><i class ="fas fa-shoe-prints"></i>即時追蹤</a></li>
+          <li><a href = "{{ url_for('history') }}"><i class ="fas fa-history" ></i>歷史分析</a></li>
+        </ul>
+      </nav>
+
+      <nav class ="mid">
+        <ul>
+          <li><a href = "#"><i class ="fas fa-sliders-h" ></i>帳戶管理</a></li>
+        </ul>
+      </nav>
+    </div> -->
+
+    <!-- New Side bar -->
+    <div id="sidebar">
+
+      <!-- Recommend -->
+      <div id="recommend_bar">
+        <div id="recommend_bar_btn" onclick="toggleRecommend();">
+          <i class="fas fa-caret-up caret-up"></i>
+        </div>
+        <div class="sidebar-con" style="height: calc(100% - 30px); overflow-y: scroll;">
+          <div class="sidebar_box" style="position: relative; height: 40px;">
+            <div id="mode1" class="mode_btn" onclick="preChangePOI_mode(1);">剩餘步數推薦</div>
+            <div id="mode2" class="mode_btn mode_btn_active" onclick="preChangePOI_mode(2);">朋友熱門程度</div>
+            <div id="mode3" class="mode_btn" onclick="preChangePOI_mode(3);">距離遠近</div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order">1</div>
+            <div class="recommend_pic" id="R-pic1">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name1">名稱</h3>
+              <p id="R-address1">地址</p>
+              <h4 id="R-dis1">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_2">2</div>
+            <div class="recommend_pic" id="R-pic2">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name2">名稱</h3>
+              <p id="R-address2">地址</p>
+              <h4 id="R-dis2">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(2);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_3">3</div>
+            <div class="recommend_pic" id="R-pic3">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name3">名稱</h3>
+              <p id="R-address3">地址</p>
+              <h4 id="R-dis3">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(3);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_4">4</div>
+            <div class="recommend_pic" id="R-pic4">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name4">名稱</h3>
+              <p id="R-address4">地址</p>
+              <h4 id="R-dis4">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(4);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_5">5</div>
+            <div class="recommend_pic" id="R-pic5">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name5">名稱</h3>
+              <p id="R-address5">地址</p>
+              <h4 id="R-dis5">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(5);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_6">6</div>
+            <div class="recommend_pic" id="R-pic6">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name6">名稱</h3>
+              <p id="R-address6">地址</p>
+              <h4 id="R-dis6">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(6);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_6">7</div>
+            <div class="recommend_pic" id="R-pic7">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name7">名稱</h3>
+              <p id="R-address7">地址</p>
+              <h4 id="R-dis7">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(7);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_6">8</div>
+            <div class="recommend_pic" id="R-pic8">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name8">名稱</h3>
+              <p id="R-address8">地址</p>
+              <h4 id="R-dis8">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(8);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_6">9</div>
+            <div class="recommend_pic" id="R-pic9">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name9">名稱</h3>
+              <p id="R-address9">地址</p>
+              <h4 id="R-dis9">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(9);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+          <div class="sidebar_box" style="position: relative; height: 120px;">
+            <div class="recommend_order color_order_6">10</div>
+            <div class="recommend_pic" id="R-pic10">
+              <div class="recommend_scene">街景預覽</div>
+            </div>
+            <div class="recommend-con">
+              <h3 id="R-name10">名稱</h3>
+              <p id="R-address10">地址</p>
+              <h4 id="R-dis10">距離0公尺</h4>
+              <div class="navigation" onclick="directionshow(10);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sidebar Toggle -->
+      <div id="sidebar_toggle_btn" onclick="toggleSidebar()"><i id="caret-left" class="fas fa-caret-left caret-left"></i></div>
+
+      <!-- Sidebar content -->
+      <div class="sidebar-con">
+        <div class="sidebar_box">
+          <div class="user-con">
+            <a onclick="addclass();"><div class="user_pic" style="background-image: url('{{pic}}');">
+              <span class="pic_change">變更</span>
+            </div></a>
+            <div class="user_info">
+              <div class="user_name">
+                <h2 style="text-transform: uppercase;">{{ user }}</h2>
+                <a href="{{ url_for('logout')}}">登出</a>
+              </div>
+              <a href="{{ url_for('home') }}" class="menu-a">
+                <div class="menu">
+                  <i class ="fas fa-book menu_icon" ></i>
+                  <h3>介紹</h3>
+                </div>
+              </a>
+              <a href="{{ url_for('health') }}" class="menu-a">
+                <div class="menu">
+                  <i class ="fas fa-chart-line menu_icon" ></i>
+                  <h3>分析</h3>
+                </div>
+              </a>
+              <a href="{{url_for('user_information')}}" class="menu-a">
+                <div class="menu">
+                  <i class ="fas fa-address-book menu_icon" ></i>
+                  <h3>好友</h3>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar_box">
+          <h2 class="ranking_h2">朋友排行</h2>
+            <div class="ranking-con" style="height: 180px; overflow-y: scroll;" id="ranking-con">
+              <div class="friend_ranking-con" id="tempRank1">
+                <div class="rank-con">
+                  <div class="ranking">1</div>
+                </div>
+                <div class="ranking-pic"></div>
+                <div class="ranking-name">使用者</div>
+                <div class="ranking-distance">資料更新中</div>
+                <div class="decorate1"></div>
+                <div class="decorate2"></div>
+              </div>
+              <div class="friend_ranking-con" id="tempRank2">
+                <div class="rank-con">
+                  <div class="ranking">2</div>
+                </div>
+                <div class="ranking-pic"></div>
+                <div class="ranking-name">使用者</div>
+                <div class="ranking-distance">資料更新中</div>
+                <div class="decorate1"></div>
+                <div class="decorate2"></div>
+              </div>
+              <div class="friend_ranking-con" id="tempRank3">
+                <div class="rank-con">
+                  <div class="ranking">3</div>
+                </div>
+                <div class="ranking-pic"></div>
+                <div class="ranking-name">使用者</div>
+                <div class="ranking-distance">資料更新中</div>
+                <div class="decorate1"></div>
+                <div class="decorate2"></div>
+              </div>
+            </div>
+        </div>
+        <div class="sidebar_box">
+          <div class="recommend" onclick="toggleRecommend()">
+            <i class="fas fa-walking recommend_icon"></i>
+            <h3>推薦熱點</h3>
+          </div>
+        </div>
+        <div class="sidebar_box">
+          <h2 class="bracelet_info_h2">即時手環資訊</h2>
+          <p id="bracelet_info_p" class="bracelet_info_p"></p>
+          <div class="current_user">
+            <div id="current_user_pic" class="current_user_pic" style="background-image: url('{{pic}}');"></div>
+            <div class="current_user_name"><h2 id="current_user_name" style="text-transform: uppercase;">{{ user }}</h2></div>
+            <a onclick="toogleBracelet();" id="bracelet_btn" class="bracelet_btn1 bracelet_btn_hidden"><div class="bracelet_btn"><i class="fas fa-exclamation-circle"></i><h3>震動手環警示使用者</h3></div></a>
+          </div>
+          <canvas id="myChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="direction_switch" onclick="directionClean();">
+        關閉導航
+    </div>
+    <div class="user_info_switch" onclick="user_info_open_or_not();">
+        開關使用者資訊
+    </div>
+
+    <!-- 360 scene -->
+    <div id="showpic-con">
+      <div class="cancel" onclick="remove()"><i class="fas fa-times fa-2x" style="color: rgba(0,0,0,0.6); cursor: pointer;"></i></div>
+      <div class="pic-con" id="pic-container"></div>
+    </div>
+
+    <div id="uploadPic-con">
+      <div class="cancel" onclick="remove2()"><i class="fas fa-times fa-2x" style="color: rgba(0,0,0,0.6); cursor: pointer;"></i></div>
+      <div class="uploadPic_form">
+        <form method="POST" action="{{ url_for('Change_pic') }}" enctype="multipart/form-data">
+          <input type="file" name="uploadpic" accept="image/*">
+          <input type="submit" value="上傳">
+        </form>
+      </div>
+    </div>
+
+    <div id="map_canvas"></div>
+
+    <!-- JS File -->
+    <!-- Google map -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw&libraries=geometry"></script>
+    <!-- Jquery -->
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <!-- Smooth API -->
+    <script type = "text/javascript" src="{{url_for('static', filename='js/d3.v3.min.js')}}"></script>
+    <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/vendor/jquery.easing.1.3.js"></script>
+    <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/vendor/markerAnimate.js"></script>
+    <script src="http://terikon.github.io/marker-animate-unobtrusive/demo/SlidingMarker.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <!-- MQTT -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+    <!-- richMarker.js -->
+    <script type = "text/javascript" src="{{url_for('static', filename='js/richmarker.js')}}"></script>
+    <!-- mainJS -->
+    <script type = "text/javascript" src="{{url_for('static', filename='js/supervise.js')}}"></script>
+
+    <script>
+      // getFriend( {{friends_number | safe}},{{choose_friends | safe}},"{{user}}");
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      MQTTconnect("{{ user }}");
+
+      //UDP 120.126.136.17:5687
+    </script>
+      
+  </body>
+</html>
