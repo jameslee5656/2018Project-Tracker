@@ -1,0 +1,23 @@
+#Internal package file, do not edit.
+#Fri May 10 15:51:22 CST 2019
+2.base=G\:\\2018Project-Tracker\\app\\Test_Watch_v5\\app\\build\\intermediates\\merged_assets\\debug\\out
+0.path=classes.dex
+2.baseType=DIRECTORY
+3.base=G\:\\2018Project-Tracker\\app\\Test_Watch_v5\\app\\build\\intermediates\\merged_assets\\debug\\out
+2.set=ASSET
+1.path=lib/armeabi-v7a/libsdk-lib.so
+4.base=G\:\\2018Project-Tracker\\app\\Test_Watch_v5\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\out
+count=5
+2.path=client_cert_2de636ddf2b946e285c5a40528974b6e.crt
+4.set=DEX
+3.path=README.md
+3.baseType=DIRECTORY
+1.set=NATIVE_RESOURCE
+4.path=classes.dex
+1.baseType=DIRECTORY
+0.base=G\:\\2018Project-Tracker\\app\\Test_Watch_v5\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\out
+0.baseType=DIRECTORY
+3.set=ASSET
+1.base=G\:\\2018Project-Tracker\\app\\Test_Watch_v5\\app\\build\\intermediates\\transforms\\mergeJniLibs\\debug\\0
+4.baseType=DIRECTORY
+0.set=DEX

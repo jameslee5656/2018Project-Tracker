@@ -1,0 +1,7 @@
+#Fri May 10 15:51:21 CST 2019
+base.0=G\:\\2018Project-Tracker\\app\\Test_Watch_v5\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\out
+path.1=classes.dex
+renamed.1=classes2.dex
+path.0=classes.dex
+renamed.0=classes.dex
+base.1=G\:\\2018Project-Tracker\\app\\Test_Watch_v5\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\out
