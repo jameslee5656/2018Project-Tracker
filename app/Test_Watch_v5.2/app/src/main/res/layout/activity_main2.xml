@@ -242,7 +242,7 @@
         android:text="快速連線"
         />
 
-    <Button
+    <!--Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -250,7 +250,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="55dp"
         android:text="test"
-        android:onClick="getData"/>
+        android:onClick="getData"/-->
 
     <!--ImageButton
         android:id="@+id/setTime"

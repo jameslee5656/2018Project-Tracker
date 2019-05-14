@@ -61,6 +61,8 @@ import static com.example.user.test_watch.App._goFITSdk;
 import  static com.example.user.test_watch.App.isSync;
 import  static com.example.user.test_watch.App.Name;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Vector;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -82,7 +84,11 @@ public class BackGroundService extends Service {
     private static MqttAndroidClient client;
     private MqttConnectOptions conOpt;
     String clientId = MqttClient.generateClientId();
-
+    Vector vStep = new Vector();
+    Vector vHr = new Vector();
+    Vector vO2 = new Vector();
+    Vector vStepTime = new Vector();
+    Vector vHrO2Time = new Vector();
 
     //x,y 實際位置;lastX,lastY最後位置
     String x = "";
@@ -92,8 +98,9 @@ public class BackGroundService extends Service {
     String step= "";
     String lastX="";
     String lastY="";
+
     long disconnectTime =0;
-    boolean notFlag=true;
+
     private final Handler ServiceHandler = new Handler();
 
     // Define the code block to be executed
@@ -110,7 +117,7 @@ public class BackGroundService extends Service {
                 try{
                     if(isSync==false &&_goFITSdk.isBLEConnect()){
 
-                        //getData();
+                        getSteps();
 
                         GetHealthData();
                         //紀錄座標
@@ -118,6 +125,7 @@ public class BackGroundService extends Service {
                             lastX=x;
                             lastY=y;
                         }
+
                         //broadcast
                         Intent i =new Intent("location_update");
                         i.putExtra("gps_value",lastX + "\n" + lastY);
@@ -131,7 +139,8 @@ public class BackGroundService extends Service {
                         if(!client.isConnected()){
                             init();
                         }
-                        pub(hr, o2, step);
+                        pubStep();
+                        pubHrO2();
 
                     }else if(!_goFITSdk.isBLEConnect() && macAddress!=""){
                         //斷線
@@ -210,6 +219,50 @@ public class BackGroundService extends Service {
         }
     };
 
+    public void pubStep(){
+        Log.d("M", "pubStep: "+vStep.size());
+        for (int i = 0 ; i < vStep.size() ; i++){
+            Object s = vStep.elementAt(i);
+            Object t = vStepTime.elementAt(i);
+
+            pub(hr,o2,(String)s,(Date)t);
+        }
+    }
+
+    public void pubHrO2(){
+        Log.d("M", "pubHrO2: "+vHr.size());
+        for (int i = 0 ; i < vHr.size() ; i++){
+            Object h = vHr.elementAt(i);
+            Object o = vO2.elementAt(i);
+            Object t = vHrO2Time.elementAt(i);
+
+            pub((String)h,(String)o,"0",(Date)t);
+        }
+    }
+
+    public void pub(String temHR,String temO2,String temStep,Date date){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH)+1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        int second = calendar.get(Calendar.SECOND);
+
+        String message = userName+":"+lastY+":"+lastX+":"+temHR+":"+temO2+":"+temStep+":"
+                +year+":"+month+":"+day+":" +hour+":"+minute+":"+second;
+        Log.d("M", "message: "+message);
+        try {
+            Log.d("GPS", "Connect?  "+client.isConnected());
+
+            client.publish(myTopic, message.getBytes(), 0, false);
+
+            Log.d("GPS", "pub ");
+        } catch (Exception e) {
+            Log.d("GPS", "MQTTException in publish"+    e.getMessage());
+        }
+    }
 
     public void pub(String temHR,String temO2,String temStep){
         Calendar calendar = Calendar.getInstance();
@@ -240,8 +293,6 @@ public class BackGroundService extends Service {
             Log.d("GPS", "sub: ");
             client.subscribe("Warning",0);
             client.subscribe(Name,0);
-            client.subscribe("standup"+Name,0);
-
         }catch(MqttException e){
             Log.d("GPS", "MQTTException in subscribe");
             e.printStackTrace();
@@ -262,13 +313,10 @@ public class BackGroundService extends Service {
                 Log.d("GPS", "messageArrived: "+subMessage);
                 if(subMessage.equals("HR_HIGH")){
                     Log.d("GPS", "HR_HIGH");
-                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,"心律過快!213212121212312312312131213123123","warning");
+                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,"心律過快!","warning");
                 }
                 if(topic.equals(Name)){
-                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,subMessage,"standup");
-                }
-                if(topic.equals("standup" + Name)){
-                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.phoneOn,subMessage,"standup");
+                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,subMessage,"notification");
 
                 }
             }
@@ -390,12 +438,21 @@ public class BackGroundService extends Service {
 
             @Override
             public void onGetFitnessData(ArrayList<TableStepRecord> stepRecords, ArrayList<TableSleepRecord> sleepRecords, ArrayList<TablePulseRecord> hrRecords, ArrayList<TableSpO2Record> spo2Records) {
+
+                //initial vector
+                vStep.clear();
+                vStepTime.clear();
+                vHr.clear();
+                vO2.clear();
+                vHrO2Time.clear();
+
                 Log.d("SIZE", ""+stepRecords.size()+"_"+hrRecords.size()+"_"+spo2Records.size());
                 for(int i = 0; i < stepRecords.size(); i++){
+                    vStep.addElement(Integer.toString(stepRecords.get(i).getSteps()));
+                    vStepTime.addElement(stepRecords.get(i).getTimestamp());
                     Log.d("A", i+" step = " + stepRecords.get(i).getSteps() + "  timestamp : " + stepRecords.get(i).getTimestamp());
                     if(i == (stepRecords.size()-1)){
                         Log.d(_tag, "Current Step: " + stepRecords.get(i).getSteps());
-                        step=Integer.toString(stepRecords.get(i).getSteps());
                         //step_value.setText(Integer.toString(stepRecords.get(i).getSteps()));
                     }
                 }
@@ -406,7 +463,8 @@ public class BackGroundService extends Service {
                 }
 
                 for(int i = 0; i < hrRecords.size(); i++){
-
+                    vHr.addElement(Integer.toString(hrRecords.get(i).getPulse()));
+                    vHrO2Time.addElement(hrRecords.get(i).getTimestamp());
                     Log.d("A", i+" hr = " + hrRecords.get(i).getPulse() + "  timestamp : " + hrRecords.get(i).getTimestamp());
                     if(i == (hrRecords.size()-1)){
                         Log.d(_tag, "Current HR: " + hrRecords.get(i).getPulse());
@@ -416,6 +474,7 @@ public class BackGroundService extends Service {
                 }
 
                 for(int i = 0; i < spo2Records.size(); i++){
+                    vO2.addElement(Integer.toString(spo2Records.get(i).getSpO2()));
                     Log.d("A", i+" o2 = " + spo2Records.get(i).getSpO2() + "  timestamp : " + spo2Records.get(i).getTimestamp());
                     if(i == (spo2Records.size()-1)){
                         Log.d(_tag, "Current o2: " + spo2Records.get(i).getSpO2());
@@ -433,23 +492,26 @@ public class BackGroundService extends Service {
         });
     }
 
-    public void getData(){
+    public void getSteps(){
         CompositeDisposable compositeDisposable = new CompositeDisposable();
         IMyService iMyService;
 
         Retrofit retrofitClient = RetrofitClient.getInstance();
         iMyService = retrofitClient.create(IMyService.class);
 
-        String n="james";
-        int y=2019,m=5,d=6;
-        compositeDisposable.add(iMyService.getDayData(n,y,m,d)
+
+
+        String n=Name;
+        compositeDisposable.add(iMyService.getSteps(n)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String response) throws Exception {
-                        _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,"今日目標    "+response+"步","getDay");
-                        Log.d("test", response);
+                        Log.d("step", response);
+                        if(!response.equals("\"No this user\"")){
+                            step=response;
+                        }
                     }
                 }));
     }

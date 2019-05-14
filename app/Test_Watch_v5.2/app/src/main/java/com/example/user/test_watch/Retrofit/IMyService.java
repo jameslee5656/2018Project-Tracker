@@ -16,6 +16,10 @@ public interface IMyService {
     Observable<String> loginrUser(@Field("name") String name,
                                   @Field("password") String password);
 
+    @POST("getSteps")
+    @FormUrlEncoded
+    Observable<String> getSteps(@Field("name") String name);
+
     @POST("get")
     @FormUrlEncoded
     Observable<String> getData(@Field("name") String name);
@@ -30,14 +34,6 @@ public interface IMyService {
     @POST("getHourData")
     @FormUrlEncoded
     Observable<String> getHourData(@Field("name") String name,
-                                   @Field("year") int year,
-                                   @Field("month") int month,
-                                   @Field("day") int day,
-                                   @Field("hour") int hour);
-
-    @POST("getRank")
-    @FormUrlEncoded
-    Observable<String> getRank(@Field("name") String name,
                                    @Field("year") int year,
                                    @Field("month") int month,
                                    @Field("day") int day,
