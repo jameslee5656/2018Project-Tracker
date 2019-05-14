@@ -23,6 +23,25 @@ class electricFence():
         self.user = ''
         self.userlist = []
         self.jsonData = {}
+    def pullDataWithTime(self, user, userlist, minDate = 1514736000000, maxDate = time.time() * 1000):
+        self.user = user
+        self.userlist = userlist
+        for x in userlist:
+            conn = MongoClient('120.126.136.17')
+            db = conn.Tracker
+            collection = [db.james]# db.db2, db.dn2, db.james, db.leo
+            userInfo = []
+            end = maxDate/1000
+            start = minDate/1000
+            for col in collection:
+                cursor = col.find({'timestamp': {'$gte': start, '$lt': end}})
+                df = pd.DataFrame(list(cursor))
+            df['step_value'].replace('', 0, inplace=True)
+            df.replace('', np.nan, inplace=True)
+            df.fillna(method='ffill', inplace=True)
+            df['latitude'] = df['latitude'].astype(float).round(4)
+            df['longitude'] = df['longitude'].astype(float).round(4)
+            self.df = df
         
     def pullData(self, user, userlist,days=14): #pull latitude and longitude
         self.user = user
@@ -37,6 +56,7 @@ class electricFence():
             for col in collection:
                 cursor = col.find({'timestamp': {'$gte': start, '$lt': end}})
                 df = pd.DataFrame(list(cursor))
+            df['step_value'].replace('', 0, inplace=True)
             df.replace('', np.nan, inplace=True)
             df.fillna(method='ffill', inplace=True)
             df['latitude'] = df['latitude'].astype(float).round(4)
