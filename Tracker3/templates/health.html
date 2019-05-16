@@ -140,7 +140,18 @@
             </div>
             <div class="col-sm-6">
                 <div class="person-con">
-                    <div class="heatmap-title">運動量熱圖分佈</div>
+                    <div class="heatmap-title">步數預測與實際比較</div>
+                    <div class="health-box" style="width: 100%;">
+                        <div class="person-date">
+                            選擇日期
+                            <input type="text" name="date" id="date1" onchange="SetChart_comparison(day1.value)" />
+                        </div>
+                        <div id="chart-box-comparison" class="chart-box">
+                            <div class="myChart-box" style="width:300px;height:180px;">
+                                <canvas id="myChart_comparison"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div> 
             </div>
         </div>
@@ -191,15 +202,23 @@
         </div>
     </div>
 
+    <!-- 360 scene -->
+    <div id="showpic-con" class="showpic-con notshowpic-con">
+      <div class="cancel" onclick="remove()"><i class="fas fa-times fa-2x" style="color: rgba(0,0,0,0.6); cursor: pointer;"></i></div>
+      <div class="pic-con" id="pic-container"></div>
+    </div>
+
         
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw&libraries=visualization"></script>
     <script src="/static/js/jquery.js"></script>
     <script src="/static/js/jquery-ui.js"></script>
+    <script src="/static/js/jquery.ui.touch-punch.min.js"></script>
     <script>
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
         $(document).ready(function(){
             $("#date").datepicker();
+            $("#date1").datepicker();
         })
     </script>
     <script src="/static/js/health.js"></script>
@@ -209,12 +228,15 @@
     	//設定今天日期
     	var today = new Date();
     	var day = document.getElementById('date');
-    	console.log()
-    	day.value = (today.getMonth()+1).toString() + '/' + today.getDate().toString() + '/' + today.getFullYear().toString()
+        var day1 =  document.getElementById('date1');
+    	day.value = (today.getMonth()+1).toString() + '/' + today.getDate().toString() + '/' + today.getFullYear().toString();
+        day1.value = (today.getMonth()+1).toString() + '/' + today.getDate().toString() + '/' + today.getFullYear().toString();
+
 
     	button();
     	showall();
         chartShowHr();
+        SetChart_comparison(day1.value);
     </script>
 </body>
 </html>

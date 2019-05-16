@@ -30,7 +30,8 @@ html, body, #map_canvas{
     width: 96%;
     height: 100%;
     margin: 5px auto;
-    overflow: hidden;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
 }
 .not-visible{
 	transform: translateX(-100%);
@@ -178,11 +179,11 @@ html, body, #map_canvas{
 
 .mode_btn{
     display: inline-block;
-    width: 30%;
+    width: 45%;
     height: 30px;
     margin-top: 5px;
     margin-bottom: 5px;
-    margin-left: 6px;
+    margin-left: 10px;
     background-color: rgba(76, 138, 150, 0.5);
     border-radius: 3px;
     cursor: pointer;

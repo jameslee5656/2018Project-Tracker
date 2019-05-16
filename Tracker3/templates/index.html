@@ -15,6 +15,7 @@
 		<noscript><link rel="stylesheet" href="{{url_for('static', filename='css/noscript.css')}}" /></noscript>
 	</head>
 	<body class="is-preload">
+		<div class="main_bg"></div>
 
 
 		<!-- Page Wrapper -->
@@ -44,7 +45,7 @@
 						<div class="bg"></div>
 						<div class="inner">
 							<h2>登入</h2>
-							<form method="post" action="http://localhost:5000/home">
+							<form method="post" action="{{ url_for('home')}}">
 								{{ log.csrf_token(id = "1") }}
 								<div class="fields">
 									<div class="field">
@@ -71,7 +72,7 @@
 								</ul>
 							</form>
 							<h2>註冊</h2>
-							<form method="post" action="http://localhost:5000/home">
+							<form method="post" action="{{ url_for('home')}}">
 								{{ reg.csrf_token(id = "2") }}
 								<div class="fields">
 									<div class="field">
@@ -179,7 +180,7 @@
 									<div class="image"><img src="../static/images/intro4.png" alt="" /></div>
 									<div class="content">
 										<h2 class="major">完整分析頁面</h2>
-										<p>點擊展開360度街景環繞</p>
+										<p>個人資料,歷史分析,熱圖格子圖呈現</p>
 									</div>
 								</div>
 							</section>
@@ -195,37 +196,6 @@
 								</div>
 							</section> -->
 
-						<!-- Six -->
-							<!-- <section id="four" class="wrapper alt style1 wow fadeInUp">
-								<div class="inner">
-									<h2 class="major">前往</h2>
-									<section class="features">
-										<article>
-											{% if user == 'manager' %}
-											<a href="{{ url_for('master_supervise') }}" class="image"><img src="../static/images/track.png" alt="" /></a>
-											{% else %}
-											<a href="{{ url_for('supervise') }}" class="image"><img src="../static/images/track.png" alt="" /></a>
-											{% endif %}
-											<h2 class="major">即時追蹤</h2>
-											<p>- 即時位置 <br>
-											   - 心率,血氧 <br>
-											   - 移動方式
-											</p>
-										</article>
-										<article>
-											{% if user == 'manager' %}
-											<a href="{{ url_for('master_history') }}" class="image"><img src="../static/images/history.png" alt="" /></a>
-											{% else %}
-											<a href="{{ url_for('history') }}" class="image"><img src="../static/images/history.png" alt="" /></a>
-											{% endif %}
-											<h2 class="major">歷史分析</h2>
-											<p>- 歷史路徑 <br>
-											   - 熱點排名及實境</p>
-										</article>
-									</section>
-								</div>
-							</section>
- -->
 					</section>
 
 
@@ -234,7 +204,7 @@
 					<section id="footer">
 						<div class="inner">
 							<h2 class="major">關於我們</h2>
-							<h3 class=" wow fadeInLeft">指導教授： 國立臺北大學 資訊工程學系 陳裕賢 / 莊東穎<br>
+							<h3 class=" wow fadeInLeft">指導教授： 國立臺北大學 資訊工程學系 陳裕賢<br>
 							   專題組員： 國立臺北大學 資工三 
 							   陳力綸 |
 							   陳瀚廷 |

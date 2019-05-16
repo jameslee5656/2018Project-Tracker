@@ -4,6 +4,7 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <title>運動手環之智慧健康管理系統</title>
 
     <link href="http://terikon.github.io/marker-animate-unobtrusive/demo/unobtrusive/map.css" rel="stylesheet" />
@@ -33,7 +34,6 @@
         <ul>
           <li><a href = "{{ url_for('home') }}"><i class ="fas fa-home" ></i>首頁</a></li>
           <li><a href = "{{ url_for('supervise') }}" style="color:#EE7700"><i class ="fas fa-shoe-prints"></i>即時追蹤</a></li>
-          <li><a href = "{{ url_for('history') }}"><i class ="fas fa-history" ></i>歷史分析</a></li>
         </ul>
       </nav>
 
@@ -52,9 +52,8 @@
         <div id="recommend_bar_btn" onclick="toggleRecommend();">
           <i class="fas fa-caret-up caret-up"></i>
         </div>
-        <div class="sidebar-con" style="height: calc(100% - 30px); overflow-y: scroll;">
+        <div class="sidebar-con" style="height: calc(100% - 30px);">
           <div class="sidebar_box" style="position: relative; height: 40px;">
-            <div id="mode1" class="mode_btn" onclick="preChangePOI_mode(1);">剩餘步數推薦</div>
             <div id="mode2" class="mode_btn mode_btn_active" onclick="preChangePOI_mode(2);">朋友熱門程度</div>
             <div id="mode3" class="mode_btn" onclick="preChangePOI_mode(3);">距離遠近</div>
           </div>
@@ -67,7 +66,7 @@
               <h3 id="R-name1">名稱</h3>
               <p id="R-address1">地址</p>
               <h4 id="R-dis1">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(1,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -79,7 +78,7 @@
               <h3 id="R-name2">名稱</h3>
               <p id="R-address2">地址</p>
               <h4 id="R-dis2">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(2);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(2,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -91,7 +90,7 @@
               <h3 id="R-name3">名稱</h3>
               <p id="R-address3">地址</p>
               <h4 id="R-dis3">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(3);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(3,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -103,7 +102,7 @@
               <h3 id="R-name4">名稱</h3>
               <p id="R-address4">地址</p>
               <h4 id="R-dis4">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(4);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(4,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -115,7 +114,7 @@
               <h3 id="R-name5">名稱</h3>
               <p id="R-address5">地址</p>
               <h4 id="R-dis5">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(5);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(5,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -127,7 +126,7 @@
               <h3 id="R-name6">名稱</h3>
               <p id="R-address6">地址</p>
               <h4 id="R-dis6">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(6);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(6,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -139,7 +138,7 @@
               <h3 id="R-name7">名稱</h3>
               <p id="R-address7">地址</p>
               <h4 id="R-dis7">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(7);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(7,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -151,7 +150,7 @@
               <h3 id="R-name8">名稱</h3>
               <p id="R-address8">地址</p>
               <h4 id="R-dis8">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(8);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(8,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -163,7 +162,7 @@
               <h3 id="R-name9">名稱</h3>
               <p id="R-address9">地址</p>
               <h4 id="R-dis9">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(9);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(9,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
           <div class="sidebar_box" style="position: relative; height: 120px;">
@@ -175,7 +174,7 @@
               <h3 id="R-name10">名稱</h3>
               <p id="R-address10">地址</p>
               <h4 id="R-dis10">距離0公尺</h4>
-              <div class="navigation" onclick="directionshow(10);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
+              <div class="navigation" onclick="directionshow(10,1);"><i class="fas fa-directions fa-2x navigation_icon"></i></div>
             </div>
           </div>
         </div>
@@ -298,7 +297,7 @@
 
     <!-- JS File -->
     <!-- Google map -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw&libraries=geometry"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw&libraries=geometry,places"></script>
     <!-- Jquery -->
     <script src="https://code.jquery.com/jquery.min.js"></script>
     <!-- Smooth API -->
