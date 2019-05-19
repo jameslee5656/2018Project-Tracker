@@ -15,6 +15,7 @@ from health import Health
 from Ranking import Rank
 import requests
 import socket
+import time
 import sys
 import os
 
@@ -57,6 +58,22 @@ def home():
         
     '''註冊實作'''
     if reg.validate_on_submit():
+        '''加入Friend'''
+        friends = mongo.db.User_Info.find()
+        temp = []
+        for f in friends:
+            temp.append(f['username'])
+        friend = { 'username' : reg.data['username'],
+                   'Friends' : temp}
+        mongo.db.Friend.insert_one(friend)
+
+        '''加入Select'''
+        sel = { 'username' : reg.data['username'],
+                'fencescale' : 10,
+                'person' : reg.data['username']}
+        mongo.db.Select_People.insert_one(sel)
+
+        '''加入User_Info'''
         new_user = { 'username' : reg.data['username'],
                      'password' : reg.data['password'],
                      'bracelet_number' : reg.data['bracelet_number'],
@@ -64,6 +81,7 @@ def home():
                      'organization' : reg.data['organization']
                     }
         mongo.db.User_Info.insert_one(new_user)
+
         user = User()
         user.id = reg.data['username']
         login_user(user)
@@ -73,10 +91,16 @@ def home():
 @app.route("/user_information",methods=['GET','POST'])
 def user_information():
     mongo = PyMongo(app)
+    friend_pic = []
     if current_user.is_active:
         user = current_user.id
         friends = mongo.db.Friend.find({'username': user})[0]['Friends']
-        return render_template('userInfo.html', user = user, friends = friends)
+
+        '''好友圖片處理'''
+        for friend in friends:
+            temp = '../static/images/user/' + friend + '.jpg'
+            friend_pic.append(temp)
+        return render_template('userInfo.html', user = user, friends = friends, friend_pic = friend_pic)
     else:
         return '請先登入！'
 
@@ -135,81 +159,11 @@ def supervise():
         user = current_user.id
         user = str(user)
         pic = '../static/images/user/' + user + '.jpg'
-
-        # '''產生好友列表'''
-        # Friends = mongo.db.Friend.find({'username': user})[0]['Friends']
-        # for friend in Friends:
-        #     '''好友圖片處理'''
-        #     temp = '../static/images/user/' + friend + '.jpg'
-        #     friend_pic.append(temp)
-
-        # '''處理勾選好友選項'''
-        # if request.method == "POST":
-        #     choose_friends = request.values.getlist("choose_friends")
-        #     de = mongo.db.Supervise_Friend.delete_one({'username': user})
-        #     insert = { 'username': user,
-        #                'Visable_Friends' : choose_friends}
-        #     ins = mongo.db.Supervise_Friend.insert_one(insert)
-        # else:
-        #     choose_friends = mongo.db.Supervise_Friend.find({'username': user})[0]['Friends']
-            
-        # '''產生選擇的好友手環編號'''
-        # for choose in choose_friends:
-        #     temp_number = mongo.db.User_Info.find({'username' : choose})[0]['bracelet_number']
-        #     friends_number.append(temp_number)
+    else:
+        return '請先登入！'
 
     return render_template('supervise.html', user = user, pic = pic)
 
-@app.route("/history", methods=['GET','POST'])
-def history():
-    global select
-    mongo = PyMongo(app)
-    select = Selection()
-    mongo = PyMongo(app)
-    user = "請先登入"
-    pic = '../static/images/user/blank.jpg'
-    FenceScale = 0
-    userlist = []
-    boundlist = []
-    if current_user.is_active:
-        user = current_user.id
-        '''動態產生選項'''
-        dates = []
-        checks = mongo.db[user].find({})
-        for check in checks:
-            temp_str = str(check['month']) + '/' + str(check['day'])
-            if temp_str not in dates:
-                dates.append(temp_str)
-        select.date.choices = [(date,date) for date in dates]
-        select.user.choices = [(user,user)]
-        pic = '../static/images/user/' + user + '.jpg'
-
-        '''電子圍籬格子大小選擇'''
-        if request.method == "POST":
-            FenceScale = request.values.get("FenceScale")
-            FenceScale = int(FenceScale)
-
-        '''使用者選擇'''
-        if user == "manager":
-            alluser = mongo.db.User_Info.find()
-            for getuser in alluser:
-                userlist.append(getuser['username'])
-        else:
-            userlist.append(user)
-
-        # print(FenceScale, file=sys.stderr)
-        # print(userlist, file=sys.stderr)
-        '''產生電子圍籬'''
-        elFence = electricFence()
-        elFence.pullData(userlist)
-        elFence.onlySanxia()
-        elFence.removeOutlier()
-        if FenceScale == 0:
-            spacelist = []
-            valuelist = []
-        else:
-            spacelist,valuelist = elFence.squareBounds(FenceScale)
-    return render_template('history.html', select = select, user = user, pic = pic, spacelist = spacelist, valuelist = valuelist)
 
 @app.route("/health")
 def health():
@@ -281,9 +235,6 @@ def change_Date():
     startDate = request.args.get('startDate', 0, type=float)
     endDate = request.args.get('endDate', 0, type=float)
     fenceScale = request.args.get('fenceScale', 0, type=float)
-    lat = request.args.get('lat', 0, type=float)
-    lng = request.args.get('lng', 0, type=float)
-    baseLocation = [lat-0.005,lng-0.005]
 
     if current_user.is_active:
         user = current_user.id
@@ -291,10 +242,8 @@ def change_Date():
         userlist = [person]
         FenceScale = int(fenceScale)
         elFence = electricFence()
-        elFence.pullData(user, userlist,startDate,endDate)
-        elFence.onlySanxia()
-        elFence.removeOutlier()
-        spacelist,valuelist = elFence.squareBounds(FenceScale,baseLocation)
+        elFence.pullDataWithTime(user, userlist,startDate,endDate)
+        spacelist,valuelist,base = elFence.squareBounds(FenceScale)
     return jsonify(spacelist,valuelist)
 
 @app.route("/GetRanking_api", methods =['GET','POST'])
@@ -328,17 +277,51 @@ def GetHealth_api():
 
 @app.route('/heatpoint_api')
 def heatpoint_api():
+    mongo = PyMongo(app)
+    userlist = []
     if current_user.is_active:
         user = current_user.id
-        userlist = ['james','leo'] 
+        users = mongo.db.User_Info.find()
+        for user in users:
+            userlist.append(user['username'])
         elFence = electricFence() 
         elFence.pullData(user,userlist,days=14)
         spacelist,valuelist,base = elFence.squareBounds()
-        print(spacelist)
-        print(valuelist)
-        print(base)
     return jsonify(valuelist,base)
+
+@app.route('/prediction_api')
+def prediction_api():
+    mongo = PyMongo(app)
+    time = request.args.get('time', 0)
+    day = int(time.split('/',2)[1])
+    month = int(time.split('/',2)[0])
+    x = []
+    predict_y = []
+    real_y = []
+
+    if current_user.is_active:
+        user = current_user.id
+        select_user = mongo.db.Select_People.find({'username': user})[0]['person']
+        predict_data = mongo.db.prediction.find({'user': select_user , 'day': day , 'month': month , 'type': 'hourly'})
+        for data in predict_data:
+            x.append(data['hour'])
+            predict_y.append(data['prediction'])
+
+        for sub_x in x:
+            hour_step = 0
+            real_data = mongo.db[select_user].find({'day': day , 'month': month , 'hour': sub_x})
+            for data in real_data:
+                if data['step_value']  != '':
+                    hour_step = hour_step + int(data['step_value'])
+            real_y.append(hour_step)
+
+        print(x, file=sys.stderr)
+        print(predict_y, file=sys.stderr)
+        print(real_y, file=sys.stderr)
+
+    return jsonify(x ,predict_y ,real_y)
+
 
 
 if __name__ == '__main__':
-    app.run(host = "localhost",debug=True)
+    app.run(host = "0.0.0.0")

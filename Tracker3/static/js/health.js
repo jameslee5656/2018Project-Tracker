@@ -1,4 +1,4 @@
-var myLineChart1,myLineChart2,myLineChart3;
+var myLineChart1,myLineChart2,myLineChart3,myLineChart4;
 
 function getdate(){
     var day = document.getElementById('date');
@@ -15,10 +15,10 @@ function button(){
     toggle_hr.addEventListener('click', function() {
         toggleNumber_hr = !toggleNumber_hr;
         if (toggleNumber_hr) {
-            toggleContainer_hr.style.clipPath = 'inset(0 0 0 50%)';
+            toggleContainer_hr.style.WebkitClipPath = 'inset(0 0 0 50%)';
             toggleContainer_hr.style.backgroundColor = '#D74046';
         } else {
-            toggleContainer_hr.style.clipPath = 'inset(0 50% 0 0)';
+            toggleContainer_hr.style.WebkitClipPath = 'inset(0 50% 0 0)';
             toggleContainer_hr.style.backgroundColor = 'dodgerblue';
         }
         console.log(toggleNumber_hr);
@@ -72,7 +72,7 @@ function SetChart_hr(x_time,y_data){
             datasets:[{
                 label: '',
                 data: xAxis,
-                backgroundColor: "rgba(0,148,255,0.6)"
+                backgroundColor: "rgba(0,148,255,0.6)",
             }]
         },
         options: {
@@ -131,6 +131,40 @@ function SetChart_step(x_time,y_data){
     });
 }
 
+function Set_comparisonChart(x,p_y,r_y){
+    var ctx_st = document.getElementById('myChart_comparison');
+
+    myLineChart4 = new Chart(ctx_st, {
+        type: 'line',
+        data: {
+            labels:x,
+            datasets:[{
+                label:'預測步數',
+                data: p_y,
+                backgroundColor: "rgba(52, 119, 226,0)",
+                borderColor: "rgba(52, 119, 226,0.6)"
+            },
+            {
+                label:'實際步數',
+                data: r_y,
+                backgroundColor: "rgba(226, 67, 49,0)",
+                borderColor: "rgba(226, 67, 49,0.6)"
+            }
+            ]
+        },
+        options: {
+        },
+    });
+}
+
+function SetChart_comparison(time){
+  $.getJSON($SCRIPT_ROOT + '/prediction_api', {
+            time : time
+            }, function(data){
+                Set_comparisonChart(data[0],data[1],data[2])
+            });
+}
+
 function getdata(type, duration, time){
 	$.getJSON($SCRIPT_ROOT + '/GetHealth_api', {
             type : type,
@@ -180,7 +214,7 @@ function chartShowSt(){
 
 
 var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, temp2 = 0, fenceInitialize = 0,
-    spacelng = 0, valuelng = 0, filenumber = 0;
+    spacelng = 0, valuelng = 0, filenumber = 0, heatmapMode = 1;
     // fenceInitialize = temp3 =>> whether the fence have been draw before
     var numbers = '12345678910';
     var counter = 0;
@@ -223,15 +257,14 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
         Global_date[1] = new Date().getTime();
       }
       map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
-      map.addListener('idle', function() {
-        var c = map.getCenter();
-        Global_centerlat = map.getCenter().lat(); 
-        Global_centerlng = map.getCenter().lng();
-        $.getJSON($SCRIPT_ROOT + '/change_Date', {
+      // map.addListener('idle', function() {
+      //   var c = map.getCenter();
+      //   Global_centerlat = map.getCenter().lat(); 
+      //   Global_centerlng = map.getCenter().lng();
+      // });
+      $.getJSON($SCRIPT_ROOT + '/change_Date', {
           startDate : Global_date[0],
           endDate : Global_date[1],
-          lat : Global_centerlat,
-          lng : Global_centerlng,
           fenceScale : Global_fenceScale
             // send lat, lng through JQuery
           }, function(data){
@@ -245,6 +278,7 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
               Global_spacelist = data[0];
               Global_valuelist = data[1];
               set_EF(data[0],data[1],Global_color);
+              console.log('leo');
               fenceInitialize = 1;
             }
             else if(fenceInitialize == 1){
@@ -254,7 +288,6 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
               set_EF(data[0],data[1],Global_color);
             }
           });
-      });
 
 
         // If the fenceScale change change cookie
@@ -325,12 +358,12 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
             endd = getCookie('EndDate');
           }
           else{
-            startd = new Date('2018.01.01').getTime();
+            startd = new Date('2018-01-01').getTime();
             endd = new Date().getTime();
           }
           $( "#slider-range" ).slider({
             range: true,
-            min: new Date('2018.01.01').getTime(),
+            min: new Date('2018-01-01').getTime(),
             max: new Date().getTime(),
               step: 86400, // every setp is one day
               values: [ startd, endd],
@@ -482,6 +515,12 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
       }
 
       function set_EF(spacelist,valuelist,color){
+        var SO = 1; FO = 0.2;
+        if(heatmapMode == 1){
+          SO = 0;
+          FO = 0;
+        }
+
         spacelng = spacelist.length;
         for(var i = 0; i < spacelist.length; i++){
           var fence = [
@@ -496,7 +535,7 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
             position: {lat: spacelist[i][0][0], lng: spacelist[i][0][1]},
             path: fence,
             strokeColor: '#000000',  
-            strokeOpacity: 0,  
+            strokeOpacity: SO,  
             strokeWeight: 1,  
             fillColor: '#000',  
             fillOpacity: 0
@@ -520,11 +559,11 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
             position: {lat: valuelist[i][0][0], lng: valuelist[i][0][1]},
             path: fence,
             strokeColor: '#000000',  
-            strokeOpacity: 0,  
+            strokeOpacity: SO,  
             strokeWeight: 1,  
             fillColor: Global_color,  
             // fillOpacity: 0.1*c
-            fillOpacity: 0 //change
+            fillOpacity: FO*c
           });
 
           if(i < 10){
@@ -566,16 +605,23 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
           radius: 60,
           opacity: 0.5
         });
-        heatmap.setMap(map);
+        if(heatmapMode == 1){
+          heatmap.setMap(map);
+        }
       }
 
       function clear(){
         for(var i = 0; i < spacelng; i++){
-          EF_array[i].setMap(null);
+            EF_array[i].setMap(null);
         }
         for(var i = 0; i < valuelng; i++){
-          EF_array1[i].setMap(null);
-          heatmap.setMap(null);
+            EF_array1[i].setMap(null);
+            if(!heatmap){
+
+            }
+            else{
+              heatmap.setMap(null);
+            }
         }
         for(var i = 0; i < 10; i++){
           if(number_array[i]){
@@ -605,7 +651,7 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
       }
 
       function remove(){
-        $('#showpic-con').removeClass('showpic-con');
+        $('#showpic-con').addClass('notshowpic-con');
       }
 
       function createRoute(marker, routenum, valuelist){
@@ -620,7 +666,7 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
               }
             });
           map.setStreetView(panorama);
-          $('#showpic-con').addClass('showpic-con'); 
+          $('#showpic-con').removeClass('notshowpic-con'); 
         }); 
       }
 
@@ -653,12 +699,18 @@ var map,heatmap,polyline,area,setarea,set_ana,setEF,setEF1,marker,temp1 = 0, tem
       }
 
       function map_menu_change_heat(){
+        clear();
+        heatmapMode = 0;
+        set_EF(Global_spacelist,Global_valuelist,Global_color);
         document.getElementById("drop-grid").classList.add('map-menu-change');
         document.getElementById("drop-heat").classList.remove('map-menu-change');
         document.getElementById("color-change").classList.remove('map-menu-change');
         document.getElementById("scale-change").classList.remove('map-menu-change');
       }
       function map_menu_change_grid(){
+        clear();
+        heatmapMode = 1;
+        set_EF(Global_spacelist,Global_valuelist,Global_color);
         document.getElementById("drop-grid").classList.remove('map-menu-change');
         document.getElementById("drop-heat").classList.add('map-menu-change');
         document.getElementById("color-change").classList.add('map-menu-change');

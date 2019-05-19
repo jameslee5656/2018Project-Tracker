@@ -293,6 +293,7 @@ public class BackGroundService extends Service {
             Log.d("GPS", "sub: ");
             client.subscribe("Warning",0);
             client.subscribe(Name,0);
+            client.subscribe("standup" + Name,0);
         }catch(MqttException e){
             Log.d("GPS", "MQTTException in subscribe");
             e.printStackTrace();
@@ -317,6 +318,10 @@ public class BackGroundService extends Service {
                 }
                 if(topic.equals(Name)){
                     _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,subMessage,"notification");
+
+                }
+                if(topic.equals("standup"+Name)){
+                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.phoneOn,subMessage,"notification");
 
                 }
             }

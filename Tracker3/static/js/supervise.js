@@ -21,12 +21,13 @@ var direction, directionLa = new Array(), directionLn = new Array();
 var directionsService = new google.maps.DirectionsService();
 var directionsDisplay = new google.maps.DirectionsRenderer();
 var current_user_lat = 0, current_user_lng = 0;
-var directionSwitch = 0;
+var directionSwitch = 0, directionshowSwitch = 0;
 var recommend_name = new Array();
 var recommendName, recommendResult = 0;
 var currentDireciion, currentMode = 2;
 var POI,POIs1 = [], POIs2 = [], POIs3 = [];
 var modePOIs2Switch = 0, modePOIs3Switch = 0;
+var service;
 
 function initialize(posi,id) {
     if(check == 0){
@@ -162,7 +163,7 @@ function onMessageArrived(msg){
     current_user_lat = la;
     current_user_lng = ln;
     if(directionSwitch == 1){
-      directionshow(currentDireciion);
+      directionshow(currentDireciion,0);
     }
   }
 
@@ -414,77 +415,83 @@ function changeRanking(){
 // Google API
 // get nearby interest_point from our heat pot
 function getPOI(rank,lng,lat){
-  var requestURL = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+lat+','+lng+'&radius=100&type=point_of_interest&language=zh-TW&key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw';
-  var request = new XMLHttpRequest();
-  request.open('GET', requestURL);
-  request.responseType = 'json';
-  request.send();
-  request.onload = function() {
-    POI = request.response; // all the points of interest
-    recommendName = POI.results[recommendResult].name;
-    if(recommendName in recommend_name || !(POI.results[recommendResult].photos)){
-      while(recommendName in recommend_name || !(POI.results[recommendResult].photos)){
-        recommendResult++;
-        recommendName = POI.results[recommendResult].name;
+  //Google Request
+  var requestLocation = new google.maps.LatLng(lat,lng);
+  var request = {
+    location: requestLocation,
+    radius: '100',
+    type: ['point_of_interest']
+  };
+  service = new google.maps.places.PlacesService(map);
+  service.nearbySearch(request, function(results, status) {
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+      POI = results; // all the points of interest
+      recommendName = POI[recommendResult].name;
+      if(recommendName in recommend_name || !(POI[recommendResult].photos)){
+        while(recommendName in recommend_name || !(POI[recommendResult].photos)){
+          recommendResult++;
+          recommendName = POI[recommendResult].name;
+        }
+        recommend_name[recommendName] = 1;
       }
-      recommend_name[recommendName] = 1;
-    }
-    else{
-      recommend_name[recommendName] = 1;
-    }
-    var address = POI.results[recommendResult].vicinity;
-    document.getElementById("R-name"+rank).innerHTML = recommendName;
-    document.getElementById("R-address"+rank).innerHTML = address;
-    var photo_reference = POI.results[recommendResult].photos[0].photo_reference;
-    var picUrl = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference='+photo_reference+'&key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw';
-    document.getElementById("R-pic"+rank).style.backgroundImage = "url('"+picUrl+"')";
-    directionLa[rank] = POI.results[recommendResult].geometry.location.lat;
-    directionLn[rank] = POI.results[recommendResult].geometry.location.lng;
-    createRoute(rank,directionLa[rank],directionLn[rank]);
-    var current_destination_lat = directionLa[rank];
-    var current_destination_lng = directionLn[rank];
-    recommendResult = 0;
-    var PointStart ={
-      lat: current_user_lat,
-      lng: current_user_lng
-    }
-    var PointDestination ={
-      lat: current_destination_lat,
-      lng: current_destination_lng
-    }
-    var distance = google.maps.geometry.spherical.computeDistanceBetween(
-       new google.maps.LatLng(PointStart),
-       new google.maps.LatLng(PointDestination)
-    )
-    distance = Math.round(distance);
-    document.getElementById("R-dis"+rank).innerHTML = '距離' + distance + '公尺';
+      else{
+        recommend_name[recommendName] = 1;
+      }
+      var address = POI[recommendResult].vicinity;
+      document.getElementById("R-name"+rank).innerHTML = recommendName;
+      document.getElementById("R-address"+rank).innerHTML = address;
+      var photo_reference = POI[recommendResult].photos[0].getUrl();
+      var picUrl = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference='+photo_reference+'&key=AIzaSyD_xrySG3MlQuGCwglYYeXztFQehgNGDbw';
+      var picUrl = photo_reference;
+      document.getElementById("R-pic"+rank).style.backgroundImage = "url('"+picUrl+"')";
+      directionLa[rank] = POI[recommendResult].geometry.location.lat();
+      directionLn[rank] = POI[recommendResult].geometry.location.lng();
+      createRoute(rank,directionLa[rank],directionLn[rank]);
+      var current_destination_lat = directionLa[rank];
+      var current_destination_lng = directionLn[rank];
+      recommendResult = 0;
+      var PointStart ={
+        lat: current_user_lat,
+        lng: current_user_lng
+      }
+      var PointDestination ={
+        lat: current_destination_lat,
+        lng: current_destination_lng
+      }
+      var distance = google.maps.geometry.spherical.computeDistanceBetween(
+         new google.maps.LatLng(PointStart),
+         new google.maps.LatLng(PointDestination)
+      )
+      distance = Math.round(distance);
+      document.getElementById("R-dis"+rank).innerHTML = '距離' + distance + '公尺';
 
-    POI_point = {
-      name: recommendName,
-      address: address,
-      photo: picUrl,
-      lat: directionLa[rank],
-      lng: directionLn[rank],
-      distance: distance
+      POI_point = {
+        name: recommendName,
+        address: address,
+        photo: picUrl,
+        lat: directionLa[rank],
+        lng: directionLn[rank],
+        distance: distance
+      }
+      POIs2.push({
+        name: recommendName,
+        address: address,
+        photo: picUrl,
+        lat: directionLa[rank],
+        lng: directionLn[rank],
+        distance: distance,
+        rank: rank
+      });
+      POIs3.push({
+        name: recommendName,
+        address: address,
+        photo: picUrl,
+        lat: directionLa[rank],
+        lng: directionLn[rank],
+        distance: distance
+      });
     }
-    POIs2.push({
-      name: recommendName,
-      address: address,
-      photo: picUrl,
-      lat: directionLa[rank],
-      lng: directionLn[rank],
-      distance: distance,
-      rank: rank
-    });
-    POIs3.push({
-      name: recommendName,
-      address: address,
-      photo: picUrl,
-      lat: directionLa[rank],
-      lng: directionLn[rank],
-      distance: distance
-    });
-  }
+  });
 }
 
 function preChangePOI_mode(mode){
@@ -494,35 +501,7 @@ function preChangePOI_mode(mode){
 
 function changePOI_mode(mode){
   if(mode != currentMode){
-    if(mode == 1){
-      document.getElementById('mode1').classList.add('mode_btn_active');
-      document.getElementById('mode2').classList.remove('mode_btn_active');
-      document.getElementById('mode3').classList.remove('mode_btn_active');
-
-      for(var i =0; i < 10; i++){
-        document.getElementById("R-name"+(i+1)).innerHTML = POIs1[i].name;
-        document.getElementById("R-address"+(i+1)).innerHTML = POIs1[i].address;
-        document.getElementById("R-pic"+(i+1)).style.backgroundImage = "url('"+POIs1[i].photo+"')";
-        document.getElementById("R-dis"+(i+1)).innerHTML = '距離' + POIs1[i].distance + '公尺';
-        createRoute(i+1,POIs1[i].lat,POIs1[i].lng);
-        var PointStart ={
-          lat: current_user_lat,
-          lng: current_user_lng
-        }
-        var PointDestination ={
-          lat: POIs1[i].lat,
-          lng: POIs1[i].lng
-        }
-        var distance = google.maps.geometry.spherical.computeDistanceBetween(
-           new google.maps.LatLng(PointStart),
-           new google.maps.LatLng(PointDestination)
-        )
-      }
-
-      currentMode = 1;
-    }
-    else if(mode == 2){
-      document.getElementById('mode1').classList.remove('mode_btn_active');
+    if(mode == 2){
       document.getElementById('mode2').classList.add('mode_btn_active');
       document.getElementById('mode3').classList.remove('mode_btn_active');
 
@@ -533,6 +512,8 @@ function changePOI_mode(mode){
         document.getElementById("R-pic"+(counter)).style.backgroundImage = "url('"+POIs2[i].photo+"')";
         document.getElementById("R-dis"+(counter)).innerHTML = '距離' + POIs2[i].distance + '公尺';
         createRoute(counter,POIs2[i].lat,POIs2[i].lng);
+        directionLa[i+1] = POIs2[i].lat;
+        directionLn[i+1] = POIs2[i].lng;
         var PointStart ={
           lat: current_user_lat,
           lng: current_user_lng
@@ -551,7 +532,6 @@ function changePOI_mode(mode){
       currentMode = 2;
     }
     else if(mode == 3){
-      document.getElementById('mode1').classList.remove('mode_btn_active');
       document.getElementById('mode2').classList.remove('mode_btn_active');
       document.getElementById('mode3').classList.add('mode_btn_active');
 
@@ -561,6 +541,8 @@ function changePOI_mode(mode){
         document.getElementById("R-pic"+(i+1)).style.backgroundImage = "url('"+POIs3[i].photo+"')";
         document.getElementById("R-dis"+(i+1)).innerHTML = '距離' + POIs3[i].distance + '公尺';
         createRoute(i+1,POIs3[i].lat,POIs3[i].lng);
+        directionLa[i+1] = POIs3[i].lat;
+        directionLn[i+1] = POIs3[i].lng;
         var PointStart ={
           lat: current_user_lat,
           lng: current_user_lng
@@ -619,7 +601,7 @@ function modePrechange(){
   }
 }
 //show direction
-function directionshow(rank){
+function directionshow(rank,temp){
   currentDireciion = rank;
   if(directionSwitch == 0){
     directionSwitch = 1;
@@ -652,6 +634,11 @@ function directionshow(rank){
   // else{
   //   alert('請先到窗邊或室外接收GPS信號 方能顯示導航路線');
   // }
+  if(temp == 1){
+    if(document.body.clientWidth < 769){
+      toggleSidebar();
+    }
+  }
 }
 
 function directionClean(){

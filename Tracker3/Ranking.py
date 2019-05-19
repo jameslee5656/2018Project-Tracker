@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 import datetime
 import json
+import sys
 
 uri = "mongodb://120.126.136.17:27017" 
 client = MongoClient(uri)
@@ -24,11 +25,11 @@ class Rank():
 		today = datetime.date.today()
 		for friend in self.friends:
 			step_value = 0
-			collect = db[friend]
-			get_values = collect.find({ "$and":[ {'year':today.year}, {'day':today.day}, {'month':today.month}] })
-			for get_value in get_values:
-				if get_value['step_value']!='':
-					step_value += int(get_value['step_value'])
+			collect = db['realtimetotalsteps']
+			try:
+				step_value = collect.find({'user' : friend})[0]['totalsteps']
+			except:
+				continue
 			templist = (friend,step_value)
 			self.record.append(templist)
 
