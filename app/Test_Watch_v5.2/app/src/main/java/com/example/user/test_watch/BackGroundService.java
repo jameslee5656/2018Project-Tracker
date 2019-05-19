@@ -99,6 +99,7 @@ public class BackGroundService extends Service {
     String lastX="";
     String lastY="";
 
+    static boolean ConnectFlag=true;
     long disconnectTime =0;
 
     private final Handler ServiceHandler = new Handler();
@@ -118,6 +119,9 @@ public class BackGroundService extends Service {
                     if(isSync==false &&_goFITSdk.isBLEConnect()){
 
                         getSteps();
+                        if(!ConnectFlag){
+                            throw new Exception();
+                        }
 
                         GetHealthData();
                         //紀錄座標
@@ -141,7 +145,7 @@ public class BackGroundService extends Service {
                         }
                         pubStep();
                         pubHrO2();
-
+                        Log.d("GPS", "finish");
                     }else if(!_goFITSdk.isBLEConnect() && macAddress!=""){
                         //斷線
                         Calendar calendar = Calendar.getInstance();
@@ -172,6 +176,7 @@ public class BackGroundService extends Service {
                                         Log.d("GPS", "onSuccess: ");
                                         isSync=false;
                                         disconnectTime=0;
+
                                     }
 
                                     @Override
@@ -220,7 +225,7 @@ public class BackGroundService extends Service {
     };
 
     public void pubStep(){
-        Log.d("M", "pubStep: "+vStep.size());
+        Log.d("GPS:", "pubStep: "+vStep.size());
         for (int i = 0 ; i < vStep.size() ; i++){
             Object s = vStep.elementAt(i);
             Object t = vStepTime.elementAt(i);
@@ -230,7 +235,7 @@ public class BackGroundService extends Service {
     }
 
     public void pubHrO2(){
-        Log.d("M", "pubHrO2: "+vHr.size());
+        Log.d("GPS:", "pubHrO2: "+vHr.size());
         for (int i = 0 ; i < vHr.size() ; i++){
             Object h = vHr.elementAt(i);
             Object o = vO2.elementAt(i);
@@ -293,7 +298,7 @@ public class BackGroundService extends Service {
             Log.d("GPS", "sub: ");
             client.subscribe("Warning",0);
             client.subscribe(Name,0);
-            client.subscribe("standup" + Name,0);
+            client.subscribe("standup"+Name,0);
         }catch(MqttException e){
             Log.d("GPS", "MQTTException in subscribe");
             e.printStackTrace();
@@ -320,8 +325,8 @@ public class BackGroundService extends Service {
                     _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.Default,subMessage,"notification");
 
                 }
-                if(topic.equals("standup"+Name)){
-                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.phoneOn,subMessage,"notification");
+                if(topic.equals("standup" + Name)){
+                    _goFITSdk.doSendIncomingMessage(AppContract.emIncomingMessageType.phoneOn,subMessage,"standup");
 
                 }
             }
@@ -514,12 +519,36 @@ public class BackGroundService extends Service {
                     @Override
                     public void accept(String response) throws Exception {
                         Log.d("step", response);
+                        ConnectFlag=true;
                         if(!response.equals("\"No this user\"")){
                             step=response;
-                        }
+                        }/*
+                        final Handler ToastHandler = new Handler();
+                        ToastHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                Toast.makeText(BackGroundService.this.getApplicationContext(), "OK", Toast.LENGTH_SHORT).show();
+                            }
+                        });*/
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        ConnectFlag=false;
+                        /*
+                        final Handler ToastHandler = new Handler();
+                        ToastHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(BackGroundService.this.getApplicationContext(), "請檢查網路狀態", Toast.LENGTH_SHORT).show();
+                            }
+                        });*/
                     }
                 }));
     }
+
+
 
     @Nullable
     @Override
@@ -589,21 +618,24 @@ public class BackGroundService extends Service {
     }
 
     private boolean checkNetWork() {
-        ConnectivityManager mConnectivityManager =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-
-        if (mNetworkInfo ==null){
-            Intent callNetSettingIntent = new Intent(
-                    Settings.ACTION_SETTINGS);
-            Toast.makeText(BackGroundService.this, "請前往開啟網路", Toast.LENGTH_LONG).show();
-            callNetSettingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(callNetSettingIntent);
+        try {
+            ConnectivityManager mConnectivityManager =
+                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            if (mNetworkInfo == null) {
+                Intent callNetSettingIntent = new Intent(
+                        Settings.ACTION_SETTINGS);
+                Toast.makeText(BackGroundService.this, "請前往開啟網路", Toast.LENGTH_LONG).show();
+                callNetSettingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(callNetSettingIntent);
+                return false;
+            } else {
+                return true;
+            }
+        }catch(Exception e){
+            Log.d("GPS", "checkNetWork: "+e.getMessage());
             return false;
-        }else{
-            return true;
         }
-
     }
 
     @SuppressLint("MissingPermission")
