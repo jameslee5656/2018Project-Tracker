@@ -23,9 +23,9 @@ while True:
 						('mongodump -h 127.0.0.1 -d Tracker -o /home/bigdata/dump/'+ filename)
 		print('\n'.join( ssh_stdout.readlines()))
 
-		os.system("scp -r bigdata@120.126.136.17:/home/bigdata/dump/" + filename + " .")
-		os.system("mongorestore -h 127.0.0.1 -d Tracker " + filename + "/Tracker --drop")
+		os.system("scp -r bigdata@120.126.136.17:/home/bigdata/dump/" + filename + " backup/")
+		os.system("mongorestore -h 127.0.0.1 -d Tracker " + 'backup/' + filename + "/Tracker --drop")
 		firstflag = False
 		ssh.close()
 	else:
-		time.sleep(60*61)
+		time.sleep(30*61)

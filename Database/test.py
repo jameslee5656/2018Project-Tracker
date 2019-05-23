@@ -1,0 +1,42 @@
+import paramiko
+import datetime
+import os
+import time
+import shutil
+
+REMOTEHOST = '120.126.136.17'
+USERNAME = 'bigdata'
+KEYPATH = '/home/james/.ssh/id_rsa'
+
+files = folders = 0
+for _, dirnames, filenames in os.walk('./backup'):
+  # ^ this idiom means "we won't be using this value"
+    files += len(filenames)
+    folders += len(dirnames)
+    dirnames.sort()
+    for i in dirnames[:-3]:
+    	shutil.rmtree('./backup/' + i)# , ignore_errors=True)
+    break
+
+#ssh settings
+ssh = paramiko.SSHClient()
+key = paramiko.RSAKey.from_private_key_file(KEYPATH)
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+now = datetime.datetime.now()
+firstflag = True
+while True: 
+	if firstflag or int((datetime.datetime.now() - now).total_seconds()) > 60*60*12:
+		ssh.connect(hostname=REMOTEHOST, port=22,username=USERNAME, pkey=key)
+		now = datetime.datetime.now()
+		filename = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") 
+		#code, printout
+		ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command \
+						('mongodump -h 127.0.0.1 -d Tracker -o /home/bigdata/dump/'+ filename)
+		print('\n'.join( ssh_stdout.readlines()))
+
+		os.system("scp -r bigdata@120.126.136.17:/home/bigdata/dump/" + filename + " backup/")
+		os.system("mongorestore -h 127.0.0.1 -d Tracker " + 'backup/' + filename + "/Tracker --drop")
+		firstflag = False
+		ssh.close()
+	else:
+		time.sleep(30*61)
