@@ -8,16 +8,6 @@ REMOTEHOST = '120.126.136.17'
 USERNAME = 'bigdata'
 KEYPATH = '/home/james/.ssh/id_rsa'
 
-files = folders = 0
-for _, dirnames, filenames in os.walk('./backup'):
-  # ^ this idiom means "we won't be using this value"
-    files += len(filenames)
-    folders += len(dirnames)
-    dirnames.sort()
-    for i in dirnames[:-3]:
-    	shutil.rmtree('./backup/' + i)# , ignore_errors=True)
-    break
-
 #ssh settings
 ssh = paramiko.SSHClient()
 key = paramiko.RSAKey.from_private_key_file(KEYPATH)
@@ -26,6 +16,15 @@ now = datetime.datetime.now()
 firstflag = True
 while True: 
 	if firstflag or int((datetime.datetime.now() - now).total_seconds()) > 60*60*12:
+		files = folders = 0
+		for _, dirnames, filenames in os.walk('./backup'):
+		  # ^ this idiom means "we won't be using this value"
+		    files += len(filenames)
+		    folders += len(dirnames)
+		    dirnames.sort()
+		    for i in dirnames[:-3]:
+		    	shutil.rmtree('./backup/' + i)# , ignore_errors=True)
+		    break
 		ssh.connect(hostname=REMOTEHOST, port=22,username=USERNAME, pkey=key)
 		now = datetime.datetime.now()
 		filename = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") 
